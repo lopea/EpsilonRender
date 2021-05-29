@@ -3,6 +3,7 @@
 //
 
 #include "Context.h"
+#include "VulkanContextRenderer.h"
 
 
 #include <stdexcept>
@@ -11,32 +12,17 @@
 
 namespace Epsilon
 {
-    Context::Context(unsigned width, unsigned height) : handle_(nullptr)
+    Context::Context(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
-      //initialize glfw and check if it successfully initialized
-      if (!glfwInit())
-      {
-        //did not initialize properly
-        throw std::runtime_error("CRITICAL ERROR: GLFW CANNOT INITIALIZE!!!");
-      }
-
-      //tell glfw that we are not using any gl handles
-      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-      //create the window
-      handle_ = glfwCreateWindow(width, height, "Epsilon", nullptr, nullptr);
-
-      uint32_t extensionCount = 0;
-
-      vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-      std::cout << "Extension Count: " << extensionCount << std::endl;
-
-
+      renderer_ = new VulkanContextRenderer();
+      handle_ = renderer_->CreateWindow(width, height);
     }
 
     Context::~Context()
     {
+      //delete the renderer specification
+      delete renderer_;
+
       //destroy the glfw window
       glfwDestroyWindow(handle_);
 

@@ -7,6 +7,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "ContextRenderer.h"
 
 namespace Epsilon
 {
@@ -24,7 +25,7 @@ namespace Epsilon
         void Update();
 
         GLFWwindow *handle_;
-        VkInstance v_instance_;
+        ContextRenderer* renderer_;
     };
 }
 

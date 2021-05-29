@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(lib)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer main.cpp Context.cpp Context.h)
+add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextRenderer.cpp ContextRenderer.h VulkanContextRenderer.cpp VulkanContextRenderer.h)
 
 # add access to Vulkan
 find_package(Vulkan REQUIRED)
