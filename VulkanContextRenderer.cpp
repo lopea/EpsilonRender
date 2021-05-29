@@ -12,8 +12,6 @@
 
 namespace Epsilon
 {
-
-
     const std::vector<const char *> LayerExtensions = {
         "VK_LAYER_KHRONOS_validation"
     };
@@ -101,6 +99,9 @@ namespace Epsilon
       //get the physical device for rendering
       PickPhysicalDevice();
 
+      //create the logical device for rendering
+      CreateLogicalDevice();
+
     }
 
     VulkanContextRenderer::~VulkanContextRenderer()
@@ -110,6 +111,9 @@ namespace Epsilon
 #ifndef NDEBUG
       VK_DestroyDebugUtilsMessengerEXT(vkInstance_, vkDebugMessenger_, nullptr);
 #endif
+
+      //clear the logical device
+      vkDestroyDevice(vkLogicalDevice_, nullptr);
 
       //destroy the instance before shutting down
       vkDestroyInstance(vkInstance_, nullptr);
@@ -301,18 +305,87 @@ namespace Epsilon
       //get the properties
       vkGetPhysicalDeviceQueueFamilyProperties(Device, &indexCount, queueProperties.data());
 
-      for(int i = 0; i < queueProperties.size(); i++)
+      for (int i = 0; i < queueProperties.size(); i++)
       {
         //get the first use of a graphics flag
-        if(queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        if (queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
           indices.graphicsInd_ = i;
 
         //if we have what we wanted, leave
-        if(indices.IsComplete())
+        if (indices.IsComplete())
           break;
       }
 
       return indices;
+    }
+
+    void VulkanContextRenderer::CreateLogicalDevice()
+    {
+      //store the priority of this logical device
+      float queuePriority = 1.0f;
+
+      //get the queue family index for the physical device
+      VkQueueFamilyIndices indices = GetQueueFamlies(vkPhysDevice_);
+
+      //store the struct to create queues for the logical device
+      VkDeviceQueueCreateInfo queueCreateInfo{};
+
+      //start populating the logical device info
+      queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+
+      //set the queue to the same one as the physical device (is this some sort of link to the physical device?)
+      queueCreateInfo.queueFamilyIndex = indices.graphicsInd_.value();
+
+      //set the count of the amount of queues the new logical device will have
+      queueCreateInfo.queueCount = 1;
+
+      //set the queue priority
+      queueCreateInfo.pQueuePriorities = &queuePriority;
+
+      //store the device features of the physical device
+      VkPhysicalDeviceFeatures deviceFeatures;
+
+      //get the device features of the current physical device
+      vkGetPhysicalDeviceFeatures(vkPhysDevice_, &deviceFeatures);
+
+      //store data to create the logical device
+      VkDeviceCreateInfo deviceCreateInfo{};
+
+      deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+      //store the queue family info for the new logical device
+      deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+
+      //store the amount of families there are in the device
+      deviceCreateInfo.queueCreateInfoCount = 1;
+
+      //store the features of the physical device to the logical one
+      deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+
+      /*
+       * not really necessary anymore but on older versions of vulkan, there was a point where you had to specify the
+       * the same validation layers on the instance to the logical device. That is not the case anymore but it will still get
+       * added for compatibility
+       */
+
+#ifndef NDEBUG
+      deviceCreateInfo.enabledLayerCount = LayerExtensions.size();
+      deviceCreateInfo.ppEnabledLayerNames = LayerExtensions.data();
+
+#else
+      deviceCreateInfo.enabledLayerCount = 0;
+#endif
+
+      //create the logical device
+      if(vkCreateDevice(vkPhysDevice_, &deviceCreateInfo, nullptr, &vkLogicalDevice_) != VK_SUCCESS)
+        //something went wrong, logical device cannot be created
+        throw std::runtime_error("VULKAN ERROR: Unable to create logical device!!!");
+
+
+      //get the queue for the graphics side of the device
+      vkGetDeviceQueue(vkLogicalDevice_, indices.graphicsInd_.value(), 0, &vkGraphQueue_);
+
+
     }
 
 

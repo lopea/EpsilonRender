@@ -35,7 +35,8 @@ namespace Epsilon
         VkInstance vkInstance_;
         VkDebugUtilsMessengerEXT vkDebugMessenger_;
         VkPhysicalDevice vkPhysDevice_;
-
+        VkDevice vkLogicalDevice_;
+        VkQueue vkGraphQueue_;
 
 
         //! create the instance for this context renderer
@@ -43,8 +44,10 @@ namespace Epsilon
         void InitValidationLayers();
         bool LayerValidationCheck();
         void PickPhysicalDevice();
+        void CreateLogicalDevice();
         bool CheckDeviceValidity(VkPhysicalDevice Device);
         VkQueueFamilyIndices GetQueueFamlies(VkPhysicalDevice Device);
+
         std::vector<const char*> GetRequiredExtensions();
     };
 
