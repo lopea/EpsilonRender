@@ -2,11 +2,11 @@
 // Created by Javier on 5/28/2021.
 //
 
-#ifndef EPSILONRENDERER_VULKANCONTEXTRENDERER_H
-#define EPSILONRENDERER_VULKANCONTEXTRENDERER_H
+#ifndef EPSILONRENDERER_VULKANCONTEXTWINDOW_H
+#define EPSILONRENDERER_VULKANCONTEXTWINDOW_H
 
 #include <vector>
-#include "ContextRenderer.h"
+#include "ContextWindow.h"
 #include <optional>
 namespace Epsilon
 {
@@ -21,28 +21,30 @@ namespace Epsilon
         }
     };
 
-    class VulkanContextRenderer : public ContextRenderer
+    class VulkanContextWindow : public ContextWindow
     {
     public:
-        VulkanContextRenderer();
+        VulkanContextWindow(unsigned width, unsigned height);
 
-        GLFWwindow *CreateWindow(unsigned width, unsigned height) override;
 
         std::string GetName() override;
 
-        ~VulkanContextRenderer() override;
+        ~VulkanContextWindow() override;
     private:
         VkInstance vkInstance_;
         VkDebugUtilsMessengerEXT vkDebugMessenger_;
         VkPhysicalDevice vkPhysDevice_;
         VkDevice vkLogicalDevice_;
         VkQueue vkGraphQueue_;
+        VkSurfaceKHR vkSurface_;
 
 
         //! create the instance for this context renderer
+        GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);
         void InitInstance();
         void InitValidationLayers();
         bool LayerValidationCheck();
+        void CreateWindowConnection();
         void PickPhysicalDevice();
         void CreateLogicalDevice();
         bool CheckDeviceValidity(VkPhysicalDevice Device);
@@ -53,4 +55,4 @@ namespace Epsilon
 
 }
 
-#endif //EPSILONRENDERER_VULKANCONTEXTRENDERER_H
+#endif //EPSILONRENDERER_VULKANCONTEXTWINDOW_H

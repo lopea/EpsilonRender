@@ -5,9 +5,10 @@
 #ifndef EPSILONRENDERER_CONTEXT_H
 #define EPSILONRENDERER_CONTEXT_H
 
-#define GLFW_INCLUDE_VULKAN
+
 #include <GLFW/glfw3.h>
-#include "ContextRenderer.h"
+
+#include "ContextWindow.h"
 
 namespace Epsilon
 {
@@ -25,7 +26,7 @@ namespace Epsilon
         void Update();
 
         GLFWwindow *handle_;
-        ContextRenderer* renderer_;
+        ContextWindow* renderer_;
     };
 }
 

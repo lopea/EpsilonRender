@@ -3,28 +3,23 @@
 //
 
 #include "Context.h"
-#include "VulkanContextRenderer.h"
+#include "VulkanContextWindow.h"
 
 
 #include <stdexcept>
 #include <iostream>
 
-
 namespace Epsilon
 {
     Context::Context(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
-      renderer_ = new VulkanContextRenderer();
-      handle_ = renderer_->CreateWindow(width, height);
+      renderer_ = new VulkanContextWindow(width,height);
     }
 
     Context::~Context()
     {
       //delete the renderer specification
       delete renderer_;
-
-      //destroy the glfw window
-      glfwDestroyWindow(handle_);
 
       //terminate glfw
       glfwTerminate();
@@ -33,7 +28,7 @@ namespace Epsilon
     void Context::Run()
     {
       //run the program until the user wants it to close
-      while(!glfwWindowShouldClose(handle_))
+      while(!renderer_->WillClose())
       {
         //run any renderer specific actions
         Update();

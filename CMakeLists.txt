@@ -10,10 +10,13 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(lib)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextRenderer.cpp ContextRenderer.h VulkanContextRenderer.cpp VulkanContextRenderer.h)
+add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextWindow.cpp ContextWindow.h VulkanContextWindow.cpp VulkanContextWindow.h)
 
 # add access to Vulkan
 find_package(Vulkan REQUIRED)
+
+#add preprocessor directive
+target_compile_definitions(EpsilonRenderer PRIVATE VK_USE_PLATFORM_WIN32_KHR GLFW_INCLUDE_VULKAN GLFW_EXPOSE_NATIVE_WIN32)
 
 # link the available libraries
 target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan)

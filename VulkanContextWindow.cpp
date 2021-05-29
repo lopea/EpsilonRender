@@ -2,13 +2,14 @@
 // Created by Javier on 5/28/2021.
 //
 
-#include "VulkanContextRenderer.h"
+#include "VulkanContextWindow.h"
 
 #include <exception>
 #include <stdexcept>
 #include <iostream>
 #include <vector>
 #include <optional>
+#include <GLFW/glfw3native.h>
 
 namespace Epsilon
 {
@@ -58,7 +59,7 @@ namespace Epsilon
       return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 
-    GLFWwindow *VulkanContextRenderer::CreateWindow(unsigned width, unsigned height)
+    GLFWwindow *VulkanContextWindow::CreateHandleWindow(unsigned width, unsigned height)
     {
       //initialize glfw and check if it successfully initialized
       if (!glfwInit())
@@ -76,13 +77,18 @@ namespace Epsilon
       return handle_;
     }
 
-    std::string VulkanContextRenderer::GetName()
+    std::string VulkanContextWindow::GetName()
     {
       return "Vulkan";
     }
 
-    VulkanContextRenderer::VulkanContextRenderer()
+    VulkanContextWindow::VulkanContextWindow(unsigned width, unsigned height) : ContextWindow(width, height),
+    vkInstance_(nullptr), vkDebugMessenger_(nullptr), vkPhysDevice_(nullptr), vkLogicalDevice_(nullptr),
+    vkGraphQueue_(nullptr), vkSurface_(nullptr)
     {
+      //create the glfw window
+      SetWindowHandle(CreateHandleWindow(width,height));
+
 #ifndef NDEBUG
       if (!LayerValidationCheck())
         throw std::runtime_error("VULKAN: Validation layers are invalid!!");
@@ -96,6 +102,9 @@ namespace Epsilon
       InitValidationLayers();
 #endif
 
+      //start a connection with the glfw window
+      CreateWindowConnection();
+
       //get the physical device for rendering
       PickPhysicalDevice();
 
@@ -104,7 +113,7 @@ namespace Epsilon
 
     }
 
-    VulkanContextRenderer::~VulkanContextRenderer()
+    VulkanContextWindow::~VulkanContextWindow()
     {
 
       //destroy the debug context if necessary
@@ -112,6 +121,7 @@ namespace Epsilon
       VK_DestroyDebugUtilsMessengerEXT(vkInstance_, vkDebugMessenger_, nullptr);
 #endif
 
+      vkDestroySurfaceKHR(vkInstance_, vkSurface_, nullptr);
       //clear the logical device
       vkDestroyDevice(vkLogicalDevice_, nullptr);
 
@@ -119,7 +129,7 @@ namespace Epsilon
       vkDestroyInstance(vkInstance_, nullptr);
     }
 
-    void VulkanContextRenderer::InitInstance()
+    void VulkanContextWindow::InitInstance()
     {
 //store the infomation that will be given to Vulkan
       VkApplicationInfo info{};
@@ -172,11 +182,9 @@ namespace Epsilon
         //something went wrong, quit program
         throw std::runtime_error("VULKAN: Failed to create vulkan instance!!");
 
-
-      std::cout << "Vulkan instance created." << std::endl;
     }
 
-    void VulkanContextRenderer::InitValidationLayers()
+    void VulkanContextWindow::InitValidationLayers()
     {
       //set data to create a debug context
       //this will be used to get call back info from vulkan itself
@@ -198,7 +206,7 @@ namespace Epsilon
 
     }
 
-    bool VulkanContextRenderer::LayerValidationCheck()
+    bool VulkanContextWindow::LayerValidationCheck()
     {
       uint32_t layerCount;
 
@@ -225,7 +233,7 @@ namespace Epsilon
       return false;
     }
 
-    std::vector<const char *> VulkanContextRenderer::GetRequiredExtensions()
+    std::vector<const char *> VulkanContextWindow::GetRequiredExtensions()
     {
       //store the name of the extensions
       const char **extensionNames;
@@ -247,7 +255,7 @@ namespace Epsilon
       return result;
     }
 
-    void VulkanContextRenderer::PickPhysicalDevice()
+    void VulkanContextWindow::PickPhysicalDevice()
     {
       //store device count
       uint32_t deviceCount = 0;
@@ -285,13 +293,13 @@ namespace Epsilon
 
     }
 
-    bool VulkanContextRenderer::CheckDeviceValidity(VkPhysicalDevice Device)
+    bool VulkanContextWindow::CheckDeviceValidity(VkPhysicalDevice Device)
     {
       //get the number of queues and check if the device has a graphics queue
       return GetQueueFamlies(Device).IsComplete();
     }
 
-    VkQueueFamilyIndices VulkanContextRenderer::GetQueueFamlies(VkPhysicalDevice Device)
+    VkQueueFamilyIndices VulkanContextWindow::GetQueueFamlies(VkPhysicalDevice Device)
     {
       VkQueueFamilyIndices indices;
       uint32_t indexCount;
@@ -319,7 +327,7 @@ namespace Epsilon
       return indices;
     }
 
-    void VulkanContextRenderer::CreateLogicalDevice()
+    void VulkanContextWindow::CreateLogicalDevice()
     {
       //store the priority of this logical device
       float queuePriority = 1.0f;
@@ -385,6 +393,27 @@ namespace Epsilon
       //get the queue for the graphics side of the device
       vkGetDeviceQueue(vkLogicalDevice_, indices.graphicsInd_.value(), 0, &vkGraphQueue_);
 
+
+    }
+
+    void VulkanContextWindow::CreateWindowConnection()
+    {
+      //TODO: This is windows specific, make sure to do something similar for linux
+
+      //store info related to the window for the engine
+      VkWin32SurfaceCreateInfoKHR info{};
+
+      //populate information
+      info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+      //give the window handle to vulkan
+      info.hwnd = glfwGetWin32Window(GetWindow());
+      //give the instance
+      info.hinstance = GetModuleHandle(nullptr);
+
+      //create the connection to the window and vulkan
+      if(vkCreateWin32SurfaceKHR(vkInstance_, &info, nullptr, &vkSurface_) != VK_SUCCESS)
+        //could not connect to the window properly, big problem
+        throw std::runtime_error("VULKAN ERROR: CANNOT ESTABLISH A CONNECTION WITH THE WINDOW!!!");
 
     }
 
