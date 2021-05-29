@@ -404,6 +404,9 @@ namespace Epsilon
       //get the queue for the graphics side of the device
       vkGetDeviceQueue(vkLogicalDevice_, indices.graphicsInd_.value(), 0, &vkGraphQueue_);
 
+      //get the queue for the present side of the device (screen, windows, etc)
+      vkGetDeviceQueue(vkLogicalDevice_, indices.presentInd_.value(), 0, &vkPresentQueue_);
+
 
     }
 
