@@ -14,10 +14,11 @@ namespace Epsilon
     struct VkQueueFamilyIndices
     {
         std::optional<uint32_t> graphicsInd_;
+        std::optional<uint32_t> presentInd_;
 
         [[nodiscard]] bool IsComplete() const
         {
-          return graphicsInd_.has_value();
+          return graphicsInd_.has_value() && presentInd_.has_value();
         }
     };
 
@@ -35,7 +36,7 @@ namespace Epsilon
         VkDebugUtilsMessengerEXT vkDebugMessenger_;
         VkPhysicalDevice vkPhysDevice_;
         VkDevice vkLogicalDevice_;
-        VkQueue vkGraphQueue_;
+        VkQueue vkGraphQueue_, vkPresentQueue_;
         VkSurfaceKHR vkSurface_;
 
 

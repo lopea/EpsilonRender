@@ -10,6 +10,7 @@
 #include <vector>
 #include <optional>
 #include <GLFW/glfw3native.h>
+#include <set>
 
 namespace Epsilon
 {
@@ -313,11 +314,19 @@ namespace Epsilon
       //get the properties
       vkGetPhysicalDeviceQueueFamilyProperties(Device, &indexCount, queueProperties.data());
 
-      for (int i = 0; i < queueProperties.size(); i++)
+      for (uint32_t i = 0; i < queueProperties.size(); i++)
       {
         //get the first use of a graphics flag
         if (queueProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
           indices.graphicsInd_ = i;
+
+        //check if the device supports a window of some sort
+        VkBool32 isPresent = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(Device, i, vkSurface_, &isPresent);
+
+        //if it does add it to the family
+        if(isPresent)
+          indices.presentInd_ = i;
 
         //if we have what we wanted, leave
         if (indices.IsComplete())
@@ -336,23 +345,25 @@ namespace Epsilon
       VkQueueFamilyIndices indices = GetQueueFamlies(vkPhysDevice_);
 
       //store the struct to create queues for the logical device
-      VkDeviceQueueCreateInfo queueCreateInfo{};
+      std::vector<VkDeviceQueueCreateInfo> queues_;
+      //store all the unique queues in the physical device
+      std::set<uint32_t> uniqueFamilies = { indices.graphicsInd_.value(), indices.presentInd_.value()};
 
-      //start populating the logical device info
-      queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+      //go through all the unique values in the list
+      for(uint32_t index : uniqueFamilies)
+      {
+        //populate information about the current device queue
+        VkDeviceQueueCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        info.queueFamilyIndex = index;
+        info.queueCount = 1;
+        info.pQueuePriorities = &queuePriority;
+        //add it to the list of values
+        queues_.push_back(info);
+      }
 
-      //set the queue to the same one as the physical device (is this some sort of link to the physical device?)
-      queueCreateInfo.queueFamilyIndex = indices.graphicsInd_.value();
-
-      //set the count of the amount of queues the new logical device will have
-      queueCreateInfo.queueCount = 1;
-
-      //set the queue priority
-      queueCreateInfo.pQueuePriorities = &queuePriority;
-
-      //store the device features of the physical device
+      //store the physical device features
       VkPhysicalDeviceFeatures deviceFeatures;
-
       //get the device features of the current physical device
       vkGetPhysicalDeviceFeatures(vkPhysDevice_, &deviceFeatures);
 
@@ -362,10 +373,10 @@ namespace Epsilon
       deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
       //store the queue family info for the new logical device
-      deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+      deviceCreateInfo.pQueueCreateInfos = queues_.data();
 
       //store the amount of families there are in the device
-      deviceCreateInfo.queueCreateInfoCount = 1;
+      deviceCreateInfo.queueCreateInfoCount = queues_.size();
 
       //store the features of the physical device to the logical one
       deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
