@@ -48,22 +48,33 @@ namespace Epsilon
         VkDevice vkLogicalDevice_;
         VkQueue vkGraphQueue_, vkPresentQueue_;
         VkSurfaceKHR vkSurface_;
-        VkSwapchainKHR vkSwapChain_;
 
+
+        VkSwapchainKHR vkSwapChain_;
+        std::vector<VkImage> vkSwapChainImages_;
+        std::vector<VkImageView> vkImageView_;
+        VkFormat vkscImageFormat;
+        VkExtent2D vkscExtent;
         //! create the instance for this context renderer
         GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);
+
+        //Init functions
         void InitInstance();
         void InitValidationLayers();
         bool LayerValidationCheck();
         void CreateWindowConnection();
         void PickPhysicalDevice();
         void CreateLogicalDevice();
+        void CreateSwapChain();
+        void CreateImageViews();
+
         bool CheckDeviceValidity(VkPhysicalDevice Device);
         static std::vector<const char *> GetRequiredExtensions();
         static bool CheckDeviceExtensionCompatibility(VkPhysicalDevice Device);
         VkQueueFamilyIndices GetQueueFamlies(VkPhysicalDevice Device);
 
-        void CreateSwapChain();
+        //Swapchain functions
+
         SwapChainContext GetSwapChainContext(VkPhysicalDevice Device);
         static VkSurfaceFormatKHR GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& avaialbleFormats);
         static VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& availableModes);

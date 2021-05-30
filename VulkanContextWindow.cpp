@@ -28,6 +28,8 @@ namespace Epsilon
                                                  const VkDebugUtilsMessengerCallbackDataEXT *callbackData,
                                                  void *userData)
     {
+      (void)severity;
+      (void)userData;
       std::cerr << "VULKAN MESSAGE" << std::endl << "TYPE: " << messageType << std::endl << callbackData->pMessage
                 << std::endl;
 
@@ -78,9 +80,9 @@ namespace Epsilon
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
       //create the window
-      GLFWwindow *handle_ = glfwCreateWindow(width, height, "Epsilon", nullptr, nullptr);
+      GLFWwindow *handle = glfwCreateWindow(width, height, "Epsilon", nullptr, nullptr);
 
-      return handle_;
+      return handle;
     }
 
     std::string VulkanContextWindow::GetName()
@@ -181,13 +183,13 @@ namespace Epsilon
       auto extensions = GetRequiredExtensions();
 
       //set the extensions to the instance info
-      vkCreateInfo.enabledExtensionCount = extensions.size();
+      vkCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
       vkCreateInfo.ppEnabledExtensionNames = extensions.data();
 
       //setup extensions if necessary
 
 #ifndef NDEBUG
-      vkCreateInfo.enabledLayerCount = LayerExtensions.size();
+      vkCreateInfo.enabledLayerCount = static_cast<uint32_t>(LayerExtensions.size());
       vkCreateInfo.ppEnabledLayerNames = LayerExtensions.data();
 #else
       vkCreateInfo.enabledLayerCount = 0;
@@ -396,7 +398,7 @@ namespace Epsilon
       deviceCreateInfo.pQueueCreateInfos = queues_.data();
 
       //store the amount of families there are in the device
-      deviceCreateInfo.queueCreateInfoCount = queues_.size();
+      deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queues_.size());
 
       //store the features of the physical device to the logical one
       deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
@@ -408,13 +410,13 @@ namespace Epsilon
        */
 
 #ifndef NDEBUG
-      deviceCreateInfo.enabledLayerCount = LayerExtensions.size();
+      deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(LayerExtensions.size());
       deviceCreateInfo.ppEnabledLayerNames = LayerExtensions.data();
 
 #else
       deviceCreateInfo.enabledLayerCount = 0;
 #endif
-      deviceCreateInfo.enabledExtensionCount = DeviceExtensions.size();
+      deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(DeviceExtensions.size());
       deviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.data();
 
       //create the logical device
@@ -562,6 +564,7 @@ namespace Epsilon
       extent.width = std::clamp(extent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
       extent.height = std::clamp(extent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 
+      return extent;
     }
 
     void VulkanContextWindow::CreateSwapChain()
@@ -616,7 +619,21 @@ namespace Epsilon
         //something went terribly wrong
         throw std::runtime_error("VULKAN ERROR: Could not create a swap chain!");
 
+      //get the swapchain images
+      unsigned int imageSize;
+      vkGetSwapchainImagesKHR(vkLogicalDevice_, vkSwapChain_, &imageSize, nullptr);
+      vkSwapChainImages_.resize(imageSize);
+      vkGetSwapchainImagesKHR(vkLogicalDevice_, vkSwapChain_, &imageSize, vkSwapChainImages_.data());
 
+
+      vkscExtent = info.imageExtent;
+      vkscImageFormat = info.imageFormat;
+
+
+    }
+
+    void VulkanContextWindow::CreateImageViews()
+    {
     }
 
 
