@@ -10,17 +10,7 @@
 #include <optional>
 namespace Epsilon
 {
-    //!used to store queues on a physical device
-    struct VkQueueFamilyIndices
-    {
-        std::optional<uint32_t> graphicsInd_;
-        std::optional<uint32_t> presentInd_;
 
-        [[nodiscard]] bool IsComplete() const
-        {
-          return graphicsInd_.has_value() && presentInd_.has_value();
-        }
-    };
 
     class VulkanContextWindow : public ContextWindow
     {
@@ -32,13 +22,33 @@ namespace Epsilon
 
         ~VulkanContextWindow() override;
     private:
+
+        //!used to store queues on a physical device
+        struct VkQueueFamilyIndices
+        {
+            std::optional<uint32_t> graphicsInd_;
+            std::optional<uint32_t> presentInd_;
+
+            [[nodiscard]] bool IsComplete() const
+            {
+              return graphicsInd_.has_value() && presentInd_.has_value();
+            }
+        };
+
+        struct SwapChainContext
+        {
+            VkSurfaceCapabilitiesKHR capabilities;
+            std::vector<VkSurfaceFormatKHR> formats;
+            std::vector<VkPresentModeKHR> presents;
+        };
+
         VkInstance vkInstance_;
         VkDebugUtilsMessengerEXT vkDebugMessenger_;
         VkPhysicalDevice vkPhysDevice_;
         VkDevice vkLogicalDevice_;
         VkQueue vkGraphQueue_, vkPresentQueue_;
         VkSurfaceKHR vkSurface_;
-
+        VkSwapchainKHR vkSwapChain_;
 
         //! create the instance for this context renderer
         GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);
@@ -49,9 +59,15 @@ namespace Epsilon
         void PickPhysicalDevice();
         void CreateLogicalDevice();
         bool CheckDeviceValidity(VkPhysicalDevice Device);
+        static std::vector<const char *> GetRequiredExtensions();
+        static bool CheckDeviceExtensionCompatibility(VkPhysicalDevice Device);
         VkQueueFamilyIndices GetQueueFamlies(VkPhysicalDevice Device);
 
-        std::vector<const char*> GetRequiredExtensions();
+        void CreateSwapChain();
+        SwapChainContext GetSwapChainContext(VkPhysicalDevice Device);
+        static VkSurfaceFormatKHR GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR>& avaialbleFormats);
+        static VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR>& availableModes);
+        VkExtent2D GetSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     };
 
 }
