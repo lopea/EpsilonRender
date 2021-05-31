@@ -52,7 +52,7 @@ namespace Epsilon
 
         VkSwapchainKHR vkSwapChain_;
         std::vector<VkImage> vkSwapChainImages_;
-        std::vector<VkImageView> vkImageView_;
+        std::vector<VkImageView> vkImageViews_;
         VkFormat vkscImageFormat;
         VkExtent2D vkscExtent;
         //! create the instance for this context renderer

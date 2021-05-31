@@ -28,8 +28,8 @@ namespace Epsilon
                                                  const VkDebugUtilsMessengerCallbackDataEXT *callbackData,
                                                  void *userData)
     {
-      (void)severity;
-      (void)userData;
+      (void) severity;
+      (void) userData;
       std::cerr << "VULKAN MESSAGE" << std::endl << "TYPE: " << messageType << std::endl << callbackData->pMessage
                 << std::endl;
 
@@ -127,13 +127,18 @@ namespace Epsilon
       //create a handle for sending pixel data from vulkan to the screen
       CreateSwapChain();
 
+      //create the image view for the swapchain
+      CreateImageViews();
     }
 
     VulkanContextWindow::~VulkanContextWindow()
     {
+      //remove all the swapchain image view
+      for(auto imageView : vkImageViews_)
+        vkDestroyImageView(vkLogicalDevice_, imageView, nullptr);
 
       //destroy the swap chain
-      vkDestroySwapchainKHR(vkLogicalDevice_,vkSwapChain_, nullptr);
+      vkDestroySwapchainKHR(vkLogicalDevice_, vkSwapChain_, nullptr);
 
       //destroy the debug context if necessary
 #ifndef NDEBUG
@@ -574,7 +579,7 @@ namespace Epsilon
 
       //create minimum image count
       unsigned imageCount = context.capabilities.minImageCount + 1;
-      if(context.capabilities.minImageCount > 0 && imageCount > context.capabilities.maxImageCount)
+      if (context.capabilities.minImageCount > 0 && imageCount > context.capabilities.maxImageCount)
         imageCount = context.capabilities.maxImageCount;
       //create a struct for creating a swapchain
       VkSwapchainCreateInfoKHR info{};
@@ -595,13 +600,12 @@ namespace Epsilon
       uint32_t queueFamily[] = {indices.graphicsInd_.value(), indices.presentInd_.value()};
 
       //set proper values based on how the queue families are set up
-      if(indices.graphicsInd_ != indices.presentInd_)
+      if (indices.graphicsInd_ != indices.presentInd_)
       {
         info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         info.queueFamilyIndexCount = 2;
         info.pQueueFamilyIndices = queueFamily;
-      }
-      else
+      } else
       {
         info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         info.queueFamilyIndexCount = 0;
@@ -615,7 +619,7 @@ namespace Epsilon
       info.oldSwapchain = VK_NULL_HANDLE;
 
       //create the swapchain
-      if(vkCreateSwapchainKHR(vkLogicalDevice_, &info, nullptr, &vkSwapChain_) != VK_SUCCESS)
+      if (vkCreateSwapchainKHR(vkLogicalDevice_, &info, nullptr, &vkSwapChain_) != VK_SUCCESS)
         //something went terribly wrong
         throw std::runtime_error("VULKAN ERROR: Could not create a swap chain!");
 
@@ -634,6 +638,47 @@ namespace Epsilon
 
     void VulkanContextWindow::CreateImageViews()
     {
+      //resize the image view to the amount of images in the swap chain
+      vkImageViews_.reserve(vkSwapChainImages_.size());
+
+      //iterate through all the images in the swapchain
+      for (auto &vkSwapChainImage : vkSwapChainImages_)
+      {
+        //we gotta create a new fucking struct, again...
+        VkImageViewCreateInfo info{};
+
+        //set the type
+        info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+        //set the image for the view
+        info.image = vkSwapChainImage;
+
+        //set the view type and the image format
+        info.format = vkscImageFormat;
+
+        //set the type of the image format
+        info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+        //allow the color channels to be interchangeable
+        info.components.r = info.components.g = info.components.b = info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+        //describe the image and what it does.
+        info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        info.subresourceRange.baseMipLevel = 0;
+        info.subresourceRange.levelCount = 1;
+        info.subresourceRange.baseArrayLayer = 0;
+        info.subresourceRange.layerCount = 1;
+
+        VkImageView view;
+
+        //create the image view for the swapchain
+        if(vkCreateImageView(vkLogicalDevice_, &info, nullptr, &view) != VK_SUCCESS)
+          //something went terribly wrong
+          throw std::runtime_error("Cannot create an image view!");
+
+        //add the view to the list
+        vkImageViews_.push_back(view);
+      }
     }
 
 
