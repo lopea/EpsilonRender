@@ -38,7 +38,7 @@ namespace Epsilon
       {
         //run any renderer specific actions
         Update();
-
+        renderer_->DrawFrame();
         //update glfw and any of its events
         glfwPollEvents();
       }

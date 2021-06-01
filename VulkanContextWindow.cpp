@@ -133,21 +133,32 @@ namespace Epsilon
 
       //create the render pass for the screen
       CreateRenderPass();
-
-      //create a fixed render pipeline
-      CreatePipeline();
       shader = new VulkanShader("vert.spv", "frag.spv", *this);
+      CreateFrameBuffers();
+
+      CreateCommandPool();
+
+      CreateCommandBuffers();
+      CreateSemaphores();
+
     }
 
     VulkanContextWindow::~VulkanContextWindow()
     {
+      vkDestroySemaphore(vkLogicalDevice_, imageAvailableSemaphore, nullptr);
+      vkDestroySemaphore(vkLogicalDevice_, renderFinishedSemaphore, nullptr);
+
+      vkDestroyCommandPool(vkLogicalDevice_, vkCommandPool_, nullptr);
       delete shader;
+
+      for (auto frameBuffer : vkSwapChainFramebuffers_)
+        vkDestroyFramebuffer(vkLogicalDevice_, frameBuffer, nullptr);
 
       //destroy the render pass layout
       vkDestroyRenderPass(vkLogicalDevice_, vkRenderPass_, nullptr);
 
       //remove all the swapchain image view
-      for(auto imageView : vkImageViews_)
+      for (auto imageView : vkImageViews_)
         vkDestroyImageView(vkLogicalDevice_, imageView, nullptr);
 
       //destroy the swap chain
@@ -677,7 +688,7 @@ namespace Epsilon
         VkImageView view;
 
         //create the image view for the swapchain
-        if(vkCreateImageView(vkLogicalDevice_, &info, nullptr, &view) != VK_SUCCESS)
+        if (vkCreateImageView(vkLogicalDevice_, &info, nullptr, &view) != VK_SUCCESS)
           //something went terribly wrong
           throw std::runtime_error("VULKAN ERROR: Cannot create an image view!");
 
@@ -686,11 +697,6 @@ namespace Epsilon
       }
     }
 
-    void VulkanContextWindow::CreatePipeline()
-    {
-
-
-    }
 
     void VulkanContextWindow::CreateRenderPass()
     {
@@ -737,6 +743,24 @@ namespace Epsilon
       subpass.colorAttachmentCount = 1;
       subpass.pColorAttachments = &colorAttachmentRef;
 
+      //Create a dependency
+      VkSubpassDependency dependency{};
+
+      //define a subpass as implicit to the render pass
+      dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+
+      //set the dependancy to the only subpass
+      dependency.srcSubpass = 0;
+
+
+      //set when the subpass should wait
+      dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+      dependency.srcAccessMask = 0;
+
+      //set when the subpass should wait when the swap chain is currently getting written
+      dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+      dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
       //another stupid struct to create the render pass
       VkRenderPassCreateInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};
 
@@ -748,8 +772,12 @@ namespace Epsilon
       renderPassInfo.pSubpasses = &subpass;
       renderPassInfo.subpassCount = 1;
 
+      //add the dependency to the renderpass
+      renderPassInfo.pDependencies = &dependency;
+      renderPassInfo.dependencyCount = 1;
+
       //create the render pass
-      if(vkCreateRenderPass(vkLogicalDevice_, &renderPassInfo, nullptr, &vkRenderPass_) != VK_SUCCESS)
+      if (vkCreateRenderPass(vkLogicalDevice_, &renderPassInfo, nullptr, &vkRenderPass_) != VK_SUCCESS)
         throw std::runtime_error("VULKAN ERROR: Cannot create the proper render pass!!");
 
 
@@ -770,5 +798,174 @@ namespace Epsilon
       return vkRenderPass_;
     }
 
+    void VulkanContextWindow::CreateFrameBuffers()
+    {
+      //create the size for the framebuffers
+      vkSwapChainFramebuffers_.resize(vkSwapChainImages_.size());
+
+      //create every buffer for the swapchain
+      for (size_t i = 0; i < vkImageViews_.size(); i++)
+      {
+        //store all the attachments for the buffer
+        VkImageView attachments[] = {vkImageViews_[i]};
+
+        //create the struct that give info to the create the struct
+        VkFramebufferCreateInfo framebufferInfo{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
+
+        //populate the struct
+        framebufferInfo.renderPass = vkRenderPass_;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = vkscExtent.width;
+        framebufferInfo.height = vkscExtent.height;
+        framebufferInfo.layers = 1;
+
+        //create the buffer
+        if (vkCreateFramebuffer(vkLogicalDevice_, &framebufferInfo, nullptr, &vkSwapChainFramebuffers_[i]) !=
+            VK_SUCCESS)
+          throw std::runtime_error("VULKAN ERROR: Failed to create a framebuffer!");
+      }
+    }
+
+    void VulkanContextWindow::CreateCommandPool()
+    {
+      VkQueueFamilyIndices queueFamilyIndices = GetQueueFamlies(vkPhysDevice_);
+
+      //another struct on the list
+      VkCommandPoolCreateInfo info{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+
+      //store the graphics index in the family
+      info.queueFamilyIndex = queueFamilyIndices.graphicsInd_.value();
+
+      //create the command pool
+      if (vkCreateCommandPool(vkLogicalDevice_, &info, nullptr, &vkCommandPool_) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: Failed to create a command buffer!");
+
+    }
+
+    void VulkanContextWindow::CreateCommandBuffers()
+    {
+      //resize the buffers based on the frame buffers
+      vkCommandBuffers_.resize(vkSwapChainFramebuffers_.size());
+
+      //please end my suffering with all these structs!!!!
+      VkCommandBufferAllocateInfo info{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+      info.commandPool = vkCommandPool_;
+      info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+      info.commandBufferCount = static_cast<uint32_t>(vkCommandBuffers_.size());
+
+      //create the command buffer
+      if (vkAllocateCommandBuffers(vkLogicalDevice_, &info, vkCommandBuffers_.data()) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: UNABLE TO ALLOCATE COMMANDBUFFERS!");
+
+
+      //start recording for command buffers
+      for (int i = 0; i < vkCommandBuffers_.size(); i++)
+      {
+        //if i had a cent for every struct i've made in this project, i would have enough to buy a gun so i can end my misery
+        VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+
+        //start the buffer for recording
+        if (vkBeginCommandBuffer(vkCommandBuffers_[i], &cbinfo) != VK_SUCCESS)
+          throw std::runtime_error("VULKAN ERROR: FAILED TO INITIALIZE COMMANDBUFFER!!!");
+
+        //start running the render pass
+
+        //another struct, another cent
+        VkRenderPassBeginInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+        renderPassInfo.renderPass = vkRenderPass_;
+        renderPassInfo.framebuffer = vkSwapChainFramebuffers_[i];
+
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = vkscExtent;
+
+        //set the clear color for the texture
+        VkClearValue clearColor = {0, 0, 0, 1};
+
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+
+        //set the render pass
+        vkCmdBeginRenderPass(vkCommandBuffers_[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        vkCmdBindPipeline(vkCommandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
+        vkCmdDraw(vkCommandBuffers_[i], 3, 1, 0, 0);
+        vkCmdEndRenderPass(vkCommandBuffers_[i]);
+
+
+        if (vkEndCommandBuffer(vkCommandBuffers_[i]) != VK_SUCCESS)
+          throw std::runtime_error("VULKAN ERROR: Failed to record command buffer!!!");
+      }
+
+
+    }
+
+    void VulkanContextWindow::CreateSemaphores()
+    {
+      //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+      VkSemaphoreCreateInfo semaphoreInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+
+      //create the semaphores
+      if (vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+          vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: Cannot create semaphores!!!");
+
+
+    }
+
+    void VulkanContextWindow::DrawFrame()
+    {
+      //store the next image for rendering
+      uint32_t imageIndex;
+
+      //get the next image
+      vkAcquireNextImageKHR(vkLogicalDevice_, vkSwapChain_, UINT32_MAX, imageAvailableSemaphore, nullptr, &imageIndex);
+
+      //this is fucking torture
+      VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+
+      //store a location of the necessary semaphore in a sendable format
+      VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
+
+      //store the stage of the semaphore
+      VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+      //populate struct
+      submitInfo.waitSemaphoreCount = 1;
+
+      //send wait requirements
+      submitInfo.pWaitSemaphores = waitSemaphores;
+      submitInfo.pWaitSemaphores = waitSemaphores;
+      submitInfo.pWaitDstStageMask = waitStages;
+
+      //send command buffers
+      submitInfo.commandBufferCount = 1;
+      submitInfo.pCommandBuffers = &vkCommandBuffers_[imageIndex];
+
+      //create the done timer in a sendable format
+      VkSemaphore signalSemaphore[] = {renderFinishedSemaphore};
+      submitInfo.signalSemaphoreCount = 1;
+      submitInfo.pSignalSemaphores = signalSemaphore;
+
+      //create send the render request to the queue
+      if (vkQueueSubmit(vkGraphQueue_, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: Failed to submit the command buffer!!!");
+
+      VkPresentInfoKHR presentinfo{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
+
+      presentinfo.waitSemaphoreCount =1;
+      presentinfo.pWaitSemaphores= signalSemaphore;
+
+      VkSwapchainKHR swapchains[] = {vkSwapChain_};
+
+      presentinfo.swapchainCount = 1;
+
+      presentinfo.pSwapchains = swapchains;
+      presentinfo.pImageIndices = &imageIndex;
+
+      vkQueuePresentKHR(vkPresentQueue_, &presentinfo);
+
+      vkQueueWaitIdle(vkPresentQueue_);
+    }
 
 }

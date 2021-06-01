@@ -16,6 +16,7 @@ public:
     std::string GetShaderType() override;
     VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
                  Epsilon::VulkanContextWindow &context);
+    VkPipeline GetPipeline() const {return pipeline_;}
     ~VulkanShader();
 private:
 

@@ -26,6 +26,8 @@ namespace Epsilon
         [[nodiscard]] VkExtent2D GetWindowExtent() const;
         [[nodiscard]] VkDevice GetLogicalDevice() const;
         [[nodiscard]] VkRenderPass GetWindowRenderPass() const;
+
+        void DrawFrame() override;
     private:
 
         //!used to store queues on a physical device
@@ -61,6 +63,10 @@ namespace Epsilon
         VkFormat vkscImageFormat;
         VkExtent2D vkscExtent;
         VkRenderPass vkRenderPass_;
+        std::vector<VkFramebuffer> vkSwapChainFramebuffers_;
+        VkCommandPool vkCommandPool_;
+        std::vector<VkCommandBuffer> vkCommandBuffers_;
+        VkSemaphore imageAvailableSemaphore, renderFinishedSemaphore;
 
         VulkanShader* shader;
 
@@ -77,7 +83,10 @@ namespace Epsilon
         void CreateSwapChain();
         void CreateImageViews();
         void CreateRenderPass();
-        void CreatePipeline();
+        void CreateFrameBuffers();
+        void CreateCommandPool();
+        void CreateCommandBuffers();
+        void CreateSemaphores();
 
         bool CheckDeviceValidity(VkPhysicalDevice Device);
         static std::vector<const char *> GetRequiredExtensions();

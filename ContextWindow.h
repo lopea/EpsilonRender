@@ -40,6 +40,9 @@ namespace Epsilon
         ContextWindow(const ContextWindow& other) = delete;
         ContextWindow& operator=(const ContextWindow& other) = delete;
 
+        //! draws all data to the screen
+        virtual void DrawFrame() = 0;
+
     protected:
         void SetWindowHandle(GLFWwindow* newWindow) { handle_ = newWindow;};
     private:
