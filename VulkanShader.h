@@ -19,8 +19,7 @@ public:
     ~VulkanShader();
 private:
 
-    void CreatePipeline(const Epsilon::VulkanContextWindow &context,
-                        VkPipelineShaderStageCreateInfo *shaderStages);
+
     VkPipelineLayout layout_;
     VkPipeline pipeline_;
     VkDevice logicalDevice_;

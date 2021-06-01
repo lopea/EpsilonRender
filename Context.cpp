@@ -13,7 +13,13 @@ namespace Epsilon
 {
     Context::Context(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
-      renderer_ = new VulkanContextWindow(width,height);
+      try
+      {
+        renderer_ = new VulkanContextWindow(width,height);
+      }catch (std::runtime_error& ex)
+      {
+        std::cerr << ex.what() << std::endl;
+      }
     }
 
     Context::~Context()

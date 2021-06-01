@@ -46,27 +46,21 @@ VulkanShader::VulkanShader(const std::string &vertFileLocation, const std::strin
   VkShaderModule vertexModule = CreateModule(vertData, logicalDevice_);
   VkShaderModule fragmentModule = CreateModule(fragData, logicalDevice_);
 
-  VkPipelineShaderStageCreateInfo vertShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+  VkPipelineShaderStageCreateInfo vertShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
   vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
   vertShaderStageInfo.module = vertexModule;
   vertShaderStageInfo.pName = "main";
 
-  VkPipelineShaderStageCreateInfo fragShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
+  VkPipelineShaderStageCreateInfo fragShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
   fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   fragShaderStageInfo.module = fragmentModule;
   fragShaderStageInfo.pName = "main";
 
 
-  vkDestroyShaderModule(logicalDevice_, vertexModule, nullptr);
-  vkDestroyShaderModule(logicalDevice_, fragmentModule, nullptr);
+
 
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
-  CreatePipeline(context, shaderStages);
-}
 
-void VulkanShader::CreatePipeline(const Epsilon::VulkanContextWindow &context,
-                                  VkPipelineShaderStageCreateInfo *shaderStages)
-{
   VkExtent2D vkscExtent = context.GetWindowExtent();
   ////////////////////////////////////////////////////
   /// Vertex Input Setup
@@ -213,7 +207,11 @@ void VulkanShader::CreatePipeline(const Epsilon::VulkanContextWindow &context,
   if(vkCreateGraphicsPipelines(logicalDevice_, nullptr, 1, &graphicsPipelineInfo, nullptr,&pipeline_) != VK_SUCCESS)
     throw std::runtime_error("VULKAN ERROR: Failed to create a proper pipeline!!!!");
 
+  vkDestroyShaderModule(logicalDevice_, vertexModule, nullptr);
+  vkDestroyShaderModule(logicalDevice_, fragmentModule, nullptr);
 }
+
+
 
 VulkanShader::~VulkanShader()
 {

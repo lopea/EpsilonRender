@@ -136,11 +136,13 @@ namespace Epsilon
 
       //create a fixed render pipeline
       CreatePipeline();
-      shader = new VulkanShader("ok", "ok", *this);
+      shader = new VulkanShader("vert.spv", "frag.spv", *this);
     }
 
     VulkanContextWindow::~VulkanContextWindow()
     {
+      delete shader;
+
       //destroy the render pass layout
       vkDestroyRenderPass(vkLogicalDevice_, vkRenderPass_, nullptr);
 
