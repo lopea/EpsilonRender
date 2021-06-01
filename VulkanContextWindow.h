@@ -8,6 +8,7 @@
 #include <vector>
 #include "ContextWindow.h"
 #include <optional>
+class VulkanShader;
 namespace Epsilon
 {
 
@@ -21,6 +22,10 @@ namespace Epsilon
         std::string GetName() override;
 
         ~VulkanContextWindow() override;
+
+        [[nodiscard]] VkExtent2D GetWindowExtent() const;
+        [[nodiscard]] VkDevice GetLogicalDevice() const;
+        [[nodiscard]] VkRenderPass GetWindowRenderPass() const;
     private:
 
         //!used to store queues on a physical device
@@ -55,6 +60,10 @@ namespace Epsilon
         std::vector<VkImageView> vkImageViews_;
         VkFormat vkscImageFormat;
         VkExtent2D vkscExtent;
+        VkRenderPass vkRenderPass_;
+
+        VulkanShader* shader;
+
         //! create the instance for this context renderer
         GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);
 
@@ -67,6 +76,8 @@ namespace Epsilon
         void CreateLogicalDevice();
         void CreateSwapChain();
         void CreateImageViews();
+        void CreateRenderPass();
+        void CreatePipeline();
 
         bool CheckDeviceValidity(VkPhysicalDevice Device);
         static std::vector<const char *> GetRequiredExtensions();

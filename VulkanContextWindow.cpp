@@ -12,6 +12,7 @@
 #include <GLFW/glfw3native.h>
 #include <set>
 #include <algorithm>
+#include "VulkanShader.h"
 
 namespace Epsilon
 {
@@ -129,10 +130,20 @@ namespace Epsilon
 
       //create the image view for the swapchain
       CreateImageViews();
+
+      //create the render pass for the screen
+      CreateRenderPass();
+
+      //create a fixed render pipeline
+      CreatePipeline();
+      shader = new VulkanShader("ok", "ok", *this);
     }
 
     VulkanContextWindow::~VulkanContextWindow()
     {
+      //destroy the render pass layout
+      vkDestroyRenderPass(vkLogicalDevice_, vkRenderPass_, nullptr);
+
       //remove all the swapchain image view
       for(auto imageView : vkImageViews_)
         vkDestroyImageView(vkLogicalDevice_, imageView, nullptr);
@@ -172,10 +183,7 @@ namespace Epsilon
       info.apiVersion = VK_API_VERSION_1_2;
 
       //store the information needed to create an instance
-      VkInstanceCreateInfo vkCreateInfo{};
-
-      //set the type
-      vkCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+      VkInstanceCreateInfo vkCreateInfo{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
 
       //add the application info
       vkCreateInfo.pApplicationInfo = &info;
@@ -380,8 +388,7 @@ namespace Epsilon
       for (uint32_t index : uniqueFamilies)
       {
         //populate information about the current device queue
-        VkDeviceQueueCreateInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        VkDeviceQueueCreateInfo info{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
         info.queueFamilyIndex = index;
         info.queueCount = 1;
         info.pQueuePriorities = &queuePriority;
@@ -395,9 +402,8 @@ namespace Epsilon
       vkGetPhysicalDeviceFeatures(vkPhysDevice_, &deviceFeatures);
 
       //store data to create the logical device
-      VkDeviceCreateInfo deviceCreateInfo{};
+      VkDeviceCreateInfo deviceCreateInfo{VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
 
-      deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
       //store the queue family info for the new logical device
       deviceCreateInfo.pQueueCreateInfos = queues_.data();
@@ -582,11 +588,10 @@ namespace Epsilon
       if (context.capabilities.minImageCount > 0 && imageCount > context.capabilities.maxImageCount)
         imageCount = context.capabilities.maxImageCount;
       //create a struct for creating a swapchain
-      VkSwapchainCreateInfoKHR info{};
+      VkSwapchainCreateInfoKHR info{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
 
       auto surfaceFormat = GetSwapChainFormat(context.formats);
       //populate struct data
-      info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
       info.surface = vkSurface_;
       info.minImageCount = imageCount;
       info.imageFormat = surfaceFormat.format;
@@ -645,10 +650,8 @@ namespace Epsilon
       for (auto &vkSwapChainImage : vkSwapChainImages_)
       {
         //we gotta create a new fucking struct, again...
-        VkImageViewCreateInfo info{};
+        VkImageViewCreateInfo info{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
 
-        //set the type
-        info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
         //set the image for the view
         info.image = vkSwapChainImage;
@@ -674,11 +677,95 @@ namespace Epsilon
         //create the image view for the swapchain
         if(vkCreateImageView(vkLogicalDevice_, &info, nullptr, &view) != VK_SUCCESS)
           //something went terribly wrong
-          throw std::runtime_error("Cannot create an image view!");
+          throw std::runtime_error("VULKAN ERROR: Cannot create an image view!");
 
         //add the view to the list
         vkImageViews_.push_back(view);
       }
+    }
+
+    void VulkanContextWindow::CreatePipeline()
+    {
+
+
+    }
+
+    void VulkanContextWindow::CreateRenderPass()
+    {
+      //setup the color attachemnt for 1 image that will be used for rendering
+      VkAttachmentDescription colorAttachment{};
+      colorAttachment.format = vkscImageFormat;
+
+      //only one sample since multisampling is not enabled
+      colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+
+      //clear all data before rendering
+      colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+
+      //keep data when we are done rendering
+      colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+      //we dont do anything with the stencil buffer, so we dont care about what happens to it
+      colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+      colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+      //we dont care how the layout of the render pass starts off
+      colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+      //we want the renderpass to be used for swap chain purposes
+      colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+      //create a sub pass for actual rendering (we can be a little more complicated once we do more advanced rendering)
+      VkAttachmentReference colorAttachmentRef{};
+
+      //connect the sub pass to the 0th index in the pass
+      colorAttachmentRef.attachment = 0;
+
+      //we want to optimize this subpass as much as possible
+      colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+      //we need to define the subpass that we want to create
+      VkSubpassDescription subpass{};
+
+      //describe that the subpass is used for graphics
+      subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+      //attach the subpass to the description
+      //NOTE: you can add more than one subpass for rendering!!!!!
+      subpass.colorAttachmentCount = 1;
+      subpass.pColorAttachments = &colorAttachmentRef;
+
+      //another stupid struct to create the render pass
+      VkRenderPassCreateInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};
+
+      //only one color attachment
+      renderPassInfo.attachmentCount = 1;
+      renderPassInfo.pAttachments = &colorAttachment;
+
+      //set the subpass for rendering
+      renderPassInfo.pSubpasses = &subpass;
+      renderPassInfo.subpassCount = 1;
+
+      //create the render pass
+      if(vkCreateRenderPass(vkLogicalDevice_, &renderPassInfo, nullptr, &vkRenderPass_) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: Cannot create the proper render pass!!");
+
+
+    }
+
+    VkExtent2D VulkanContextWindow::GetWindowExtent() const
+    {
+      return vkscExtent;
+    }
+
+    VkDevice VulkanContextWindow::GetLogicalDevice() const
+    {
+      return vkLogicalDevice_;
+    }
+
+    VkRenderPass VulkanContextWindow::GetWindowRenderPass() const
+    {
+      return vkRenderPass_;
     }
 
 
