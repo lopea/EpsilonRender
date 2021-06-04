@@ -16,57 +16,9 @@
 
 namespace Epsilon
 {
-    const std::vector<const char *> LayerExtensions = {
-        "VK_LAYER_KHRONOS_validation"
-    };
 
-    const std::vector<const char *> DeviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
 
-    VKAPI_ATTR VkBool32 VKAPI_CALL debugCallBack(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-                                                 VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                                 const VkDebugUtilsMessengerCallbackDataEXT *callbackData,
-                                                 void *userData)
-    {
-      (void) severity;
-      (void) userData;
-      std::cerr << "VULKAN MESSAGE" << std::endl << "TYPE: " << messageType << std::endl << callbackData->pMessage
-                << std::endl;
 
-      return VK_FALSE;
-    }
-
-    //used to access an extension function in Vulkan, specifically one to get error messages from vulkan itself
-    VkResult VK_CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *info,
-                                             const VkAllocationCallbacks *alloc, VkDebugUtilsMessengerEXT *messenger)
-    {
-      //get the function from vulkan
-      auto debugFunc = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance,
-                                                                                  "vkCreateDebugUtilsMessengerEXT");
-      //if the function exists,
-      if (debugFunc)
-        return debugFunc(instance, info, alloc, messenger);
-
-      //something went wrong, (maybe extension does not exist, bad driver installation)
-      return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-
-    //used to access function to remove any debug tools and shut them down properly
-    VkResult VK_DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                              const VkAllocationCallbacks *alloc)
-    {
-
-      auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance,
-                                                                              "vkDestroyDebugUtilsMessengerEXT");
-      if (func)
-      {
-        func(instance, debugMessenger, alloc);
-        return VK_SUCCESS;
-      }
-      //something went wrong (bad driver installation)
-      return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
 
     GLFWwindow *VulkanContextWindow::CreateHandleWindow(unsigned width, unsigned height)
     {
@@ -103,10 +55,6 @@ namespace Epsilon
       //create the glfw window
       SetWindowHandle(CreateHandleWindow(width, height));
 
-#ifndef NDEBUG
-      if (!LayerValidationCheck())
-        throw std::runtime_error("VULKAN: Validation layers are invalid!!");
-#endif
       //create the instance
       InitInstance();
 
@@ -133,7 +81,7 @@ namespace Epsilon
 
       //create the render pass for the screen
       CreateRenderPass();
-      shader = new VulkanShader("vert.spv", "frag.spv", *this);
+      shader = new Epsilon::VulkanShader("vert.spv", "frag.spv", *this);
       CreateFrameBuffers();
 
       CreateCommandPool();
@@ -179,53 +127,6 @@ namespace Epsilon
 
     void VulkanContextWindow::InitInstance()
     {
-//store the infomation that will be given to Vulkan
-      VkApplicationInfo info{};
-
-      //set the type of the application info
-      info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-
-      //set the name of our application
-      info.pApplicationName = "Epsilon";
-
-      //set the name of the engine
-      info.pEngineName = "Epsilon Engine";
-
-      //set the version of the vulkan instance and of our engine
-      info.engineVersion = VK_MAKE_API_VERSION(1, 0, 1, 0);
-      info.apiVersion = VK_API_VERSION_1_2;
-
-      //store the information needed to create an instance
-      VkInstanceCreateInfo vkCreateInfo{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
-
-      //add the application info
-      vkCreateInfo.pApplicationInfo = &info;
-
-      //
-      //set extensions
-      //
-
-      //get the extensions required for the renderer
-      auto extensions = GetRequiredExtensions();
-
-      //set the extensions to the instance info
-      vkCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-      vkCreateInfo.ppEnabledExtensionNames = extensions.data();
-
-      //setup extensions if necessary
-
-#ifndef NDEBUG
-      vkCreateInfo.enabledLayerCount = static_cast<uint32_t>(LayerExtensions.size());
-      vkCreateInfo.ppEnabledLayerNames = LayerExtensions.data();
-#else
-      vkCreateInfo.enabledLayerCount = 0;
-#endif
-
-
-      //create the instance!
-      if (vkCreateInstance(&vkCreateInfo, nullptr, &vkInstance_) != VK_SUCCESS)
-        //something went wrong, quit program
-        throw std::runtime_error("VULKAN: Failed to create vulkan instance!!");
 
     }
 

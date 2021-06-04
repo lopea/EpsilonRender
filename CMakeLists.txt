@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(lib)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextWindow.cpp ContextWindow.h VulkanContextWindow.cpp VulkanContextWindow.h Shader.cpp Shader.h VulkanShader.cpp VulkanShader.h)
+add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextWindow.cpp ContextWindow.h VulkanContextWindow.cpp VulkanContextWindow.h Shader.cpp Shader.h VulkanShader.cpp VulkanShader.h VulkanSwapChain.cpp VulkanSwapChain.h VulkanInstance.cpp VulkanInstance.h VulkanInitializationException.h VulkanQueueFamilies.h SwapChainContext.h VulkanDevice.cpp VulkanDevice.h VulkanSurface.cpp VulkanSurface.h)
 
 set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
 

@@ -10,23 +10,30 @@
 #include "vulkan/vulkan.h"
 #include "VulkanContextWindow.h"
 
-class VulkanShader : public Shader_
+namespace Epsilon
 {
-public:
-    std::string GetShaderType() override;
-    VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                 Epsilon::VulkanContextWindow &context);
-    VkPipeline GetPipeline() const {return pipeline_;}
-    ~VulkanShader();
-private:
+    class VulkanShader : public Shader_
+    {
+    public:
+        std::string GetShaderType() override;
+
+        VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
+                     Epsilon::VulkanContextWindow &context);
+
+        VkPipeline GetPipeline() const
+        { return pipeline_; }
+
+        ~VulkanShader();
+
+    private:
 
 
-    VkPipelineLayout layout_;
-    VkPipeline pipeline_;
-    VkDevice logicalDevice_;
+        VkPipelineLayout layout_;
+        VkPipeline pipeline_;
+        VkDevice logicalDevice_;
 
-    std::string name;
-};
-
+        std::string name;
+    };
+}
 
 #endif //EPSILONRENDERER_VULKANSHADER_H
