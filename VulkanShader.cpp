@@ -26,9 +26,10 @@ VkShaderModule CreateModule(const std::vector<char> &data, VkDevice device)
 namespace Epsilon
 {
     VulkanShader::VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                               Epsilon::VulkanContextWindow &context) : pipeline_(nullptr),
-                                                                        logicalDevice_(context.GetLogicalDevice())
+                               Epsilon::Vulkan::ContextWindow &context) : pipeline_(nullptr),
+                                                                        logicalDevice_(nullptr)
     {
+      (void)context;
       std::ifstream vertShader(vertFileLocation, std::ios::binary), fragShader(fragFileLocation, std::ios::binary);
 
       //check if files are valuable
@@ -62,7 +63,7 @@ namespace Epsilon
 
       VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-      VkExtent2D vkscExtent = context.GetWindowExtent();
+      VkExtent2D vkscExtent = {0,0};
       ////////////////////////////////////////////////////
       /// Vertex Input Setup
       ////////////////////////////////////////////////////
@@ -203,7 +204,7 @@ namespace Epsilon
       graphicsPipelineInfo.pColorBlendState = &colorBlend;
       graphicsPipelineInfo.layout = layout_;
       graphicsPipelineInfo.pRasterizationState = &rasterizer;
-      graphicsPipelineInfo.renderPass = context.GetWindowRenderPass();
+      graphicsPipelineInfo.renderPass =nullptr; //context.GetWindowRenderPass();
 
       if (vkCreateGraphicsPipelines(logicalDevice_, nullptr, 1, &graphicsPipelineInfo, nullptr, &pipeline_) !=
           VK_SUCCESS)

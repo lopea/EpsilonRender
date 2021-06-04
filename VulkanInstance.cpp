@@ -197,8 +197,15 @@ namespace Epsilon::Vulkan
 
     Instance::~Instance()
     {
+      //destroy the debug context if necessary
+#ifndef NDEBUG
+      VK_DestroyDebugUtilsMessengerEXT(vkInstance_, vkMessenger_, nullptr);
+#endif
       //cleanup the instance
       vkDestroyInstance(vkInstance_, nullptr);
+
+
+
     }
 
 }

@@ -112,8 +112,8 @@ namespace Epsilon::Vulkan
 //#else
 //      deviceCreateInfo.enabledLayerCount = 0;
 //#endif
-//      deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(DeviceExtensions.size());
-//      deviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.data();
+      deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(DeviceExtensions.size());
+      deviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.data();
 
       //create the logical device
       if (vkCreateDevice(vkPhysDevice_, &deviceCreateInfo, nullptr, &vkLogicalDevice_) != VK_SUCCESS)

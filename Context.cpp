@@ -15,7 +15,7 @@ namespace Epsilon
     {
       try
       {
-        renderer_ = new VulkanContextWindow(width,height);
+        renderer_ = new Vulkan::ContextWindow(width,height);
       }catch (std::runtime_error& ex)
       {
         std::cerr << ex.what() << std::endl;

@@ -19,11 +19,13 @@ namespace Epsilon
          * Will initialize the width and height of the ContextWindow for default use
          * @param width the width of the window in pixel units
          * @param height the height of the window in pixel units
+         * @param window window handle that will connected by this context class
          */
-        ContextWindow(unsigned width, unsigned height): width_(width), height_(height), handle_(nullptr){}
+        ContextWindow(unsigned width, unsigned height, GLFWwindow* window = nullptr)
+        : width_(width), height_(height), handle_(window){}
 
         //! @return the handle associated with this window
-        virtual GLFWwindow *GetWindow(){return handle_;};
+        GLFWwindow *GetWindow(){return handle_;};
 
         //! @return Get the name of the render specification
         virtual std::string GetName() = 0;

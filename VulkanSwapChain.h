@@ -27,6 +27,10 @@ namespace Epsilon::Vulkan
         VkFormat format_;
         VkDevice logicalDevice_;
         VkRenderPass renderPass_;
+        std::vector<VkFramebuffer> frameBuffers_;
+        VkCommandPool commandPool_;
+        std::vector<VkCommandBuffer> commandBuffers_;
+        VkSemaphore imageAvailableSemaphore, renderFinishedSemaphore;
 
         VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availableModes);
 
@@ -41,6 +45,13 @@ namespace Epsilon::Vulkan
 
         void CreateRenderPass();
 
+        void CreateCommandPool(const Device &device, const Surface &screen);
+
+        void CreateFrameBuffers();
+
+        void CreateCommandBuffers();
+
+        void CreateSemaphores();
     };
 }
 
