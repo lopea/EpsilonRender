@@ -11,18 +11,22 @@
 #include "VulkanSurface.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
+#include "Shader.h"
 #include <optional>
 
+namespace Epsilon
+{
+    class VulkanShader;
+}
 
 namespace Epsilon::Vulkan
 {
-    class VulkanShader;
-
     class ContextWindow : public Epsilon::ContextWindow
     {
     public:
         ContextWindow(unsigned width, unsigned height);
 
+        void Render(Shader);
         std::string GetName() override;
         void DrawFrame() override;
     private:
@@ -30,8 +34,7 @@ namespace Epsilon::Vulkan
         Surface surface_;
         Device device_;
         SwapChain swapChain_;
-
-        VulkanShader* shader;
+        VulkanShader* shader_;
 
         //! create the instance for this context renderer
         static GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);

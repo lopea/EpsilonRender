@@ -23,6 +23,7 @@ namespace Epsilon::Vulkan
     {
       (void) severity;
       (void) userData;
+
       std::cerr << "VULKAN MESSAGE" << std::endl << "TYPE: " << messageType << std::endl << callbackData->pMessage
                 << std::endl;
 

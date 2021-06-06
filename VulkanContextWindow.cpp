@@ -46,7 +46,9 @@ namespace Epsilon::Vulkan
     surface_(GetWindow(), instance_),
     device_(instance_, surface_),
       swapChain_(device_, surface_, GetWindow())
-    {}
+    {
+      shader_ = new VulkanShader("vert.spv", "frag.spv", swapChain_);
+    }
 
 
 
@@ -732,8 +734,8 @@ namespace Epsilon::Vulkan
 //      VkSemaphoreCreateInfo semaphoreInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
 //
 //      //create the semaphores
-//      if (vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-//          vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS)
+//      if (vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &imageAvailableSemaphore_) != VK_SUCCESS ||
+//          vkCreateSemaphore(vkLogicalDevice_, &semaphoreInfo, nullptr, &renderFinishedSemaphore_) != VK_SUCCESS)
 //        throw std::runtime_error("VULKAN ERROR: Cannot create semaphores!!!");
 //
 //
@@ -741,57 +743,20 @@ namespace Epsilon::Vulkan
 
     void ContextWindow::DrawFrame()
     {
-//      //store the next image for rendering
-//      uint32_t imageIndex;
-//
-//      //get the next image
-//      vkAcquireNextImageKHR(vkLogicalDevice_, vkSwapChain_, UINT32_MAX, imageAvailableSemaphore, nullptr, &imageIndex);
-//
-//      //this is fucking torture
-//      VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
-//
-//      //store a location of the necessary semaphore in a sendable format
-//      VkSemaphore waitSemaphores[] = {imageAvailableSemaphore};
-//
-//      //store the stage of the semaphore
-//      VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-//
-//      //populate struct
-//      submitInfo.waitSemaphoreCount = 1;
-//
-//      //send wait requirements
-//      submitInfo.pWaitSemaphores = waitSemaphores;
-//      submitInfo.pWaitSemaphores = waitSemaphores;
-//      submitInfo.pWaitDstStageMask = waitStages;
-//
-//      //send command buffers
-//      submitInfo.commandBufferCount = 1;
-//      submitInfo.pCommandBuffers = &vkCommandBuffers_[imageIndex];
-//
-//      //create the done timer in a sendable format
-//      VkSemaphore signalSemaphore[] = {renderFinishedSemaphore};
-//      submitInfo.signalSemaphoreCount = 1;
-//      submitInfo.pSignalSemaphores = signalSemaphore;
-//
-//      //create send the render request to the queue
-//      if (vkQueueSubmit(vkGraphQueue_, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
-//        throw std::runtime_error("VULKAN ERROR: Failed to submit the command buffer!!!");
-//
-//      VkPresentInfoKHR presentinfo{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
-//
-//      presentinfo.waitSemaphoreCount =1;
-//      presentinfo.pWaitSemaphores= signalSemaphore;
-//
-//      VkSwapchainKHR swapchains[] = {vkSwapChain_};
-//
-//      presentinfo.swapchainCount = 1;
-//
-//      presentinfo.pSwapchains = swapchains;
-//      presentinfo.pImageIndices = &imageIndex;
-//
-//      vkQueuePresentKHR(vkPresentQueue_, &presentinfo);
-//
-//      vkQueueWaitIdle(vkPresentQueue_);
+      swapChain_.ClearFrame();
+      swapChain_.RenderShader(shader_);
+      swapChain_.FinishFrame();
+      swapChain_.Present();
+    }
+
+    void ContextWindow::Render(Shader shader)
+    {
+      if(shader->GetShaderType() == "Vulkan")
+      {
+        VulkanShader* vShader = static_cast<VulkanShader*>(shader);
+
+        swapChain_.RenderShader(vShader);
+      }
     }
 
 }

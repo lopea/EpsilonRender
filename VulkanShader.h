@@ -18,7 +18,7 @@ namespace Epsilon
         std::string GetShaderType() override;
 
         VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                     Epsilon::Vulkan::ContextWindow &context);
+                     Vulkan::SwapChain& swapChain_);
 
         VkPipeline GetPipeline() const
         { return pipeline_; }

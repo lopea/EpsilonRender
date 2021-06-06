@@ -9,28 +9,51 @@
 #include <vector>
 #include "VulkanDevice.h"
 
+namespace Epsilon
+{
+    class VulkanShader;
+}
 namespace Epsilon::Vulkan
 {
+
     //! Represents the buffer that is used to render to the screen
     class SwapChain
     {
     public:
-        SwapChain(const Device &device, const Surface &screen, GLFWwindow *window);
+        SwapChain(Device &device, Surface &screen, GLFWwindow *window);
         ~SwapChain();
         [[nodiscard]] VkSwapchainKHR GetSwapchainHandle() const { return handle_; }
         [[nodiscard]] VkExtent2D GetExtent() const {return extent_;}
+        void Present();
+        void ClearFrame();
+        void FinishFrame();
+        void RenderShader(VulkanShader* shader);
+        [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
+        [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
+
     private:
+
+        Device& Device_;
+        Surface& surface_;
+        GLFWwindow *windowHandle_;
+
+        VkFormat format_;
         VkSwapchainKHR handle_;
         std::vector<VkImage> images_;
         std::vector<VkImageView> views_;
         VkExtent2D extent_;
-        VkFormat format_;
-        VkDevice logicalDevice_;
         VkRenderPass renderPass_;
         std::vector<VkFramebuffer> frameBuffers_;
         VkCommandPool commandPool_;
         std::vector<VkCommandBuffer> commandBuffers_;
-        VkSemaphore imageAvailableSemaphore, renderFinishedSemaphore;
+        std::vector<VkSemaphore> imageAvailableSemaphore_, renderFinishedSemaphore_;
+        std::vector<VkFence> fences_;
+        std::size_t currentFrame_ = 0;
+        const int framesPerFlight = 2;
+        //store the next image for rendering
+        uint32_t imageIndex = 0;
+
+        bool initialized_ = false;
 
         VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availableModes);
 
@@ -52,6 +75,10 @@ namespace Epsilon::Vulkan
         void CreateCommandBuffers();
 
         void CreateSemaphores();
+
+        void Initialize();
+        void Cleanup();
+
     };
 }
 

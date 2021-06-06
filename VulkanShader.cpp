@@ -6,7 +6,7 @@
 #include "VulkanContextWindow.h"
 #include <fstream>
 #include <vector>
-
+#include "VulkanSwapChain.h"
 
 VkShaderModule CreateModule(const std::vector<char> &data, VkDevice device)
 {
@@ -26,10 +26,10 @@ VkShaderModule CreateModule(const std::vector<char> &data, VkDevice device)
 namespace Epsilon
 {
     VulkanShader::VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                               Epsilon::Vulkan::ContextWindow &context) : pipeline_(nullptr),
-                                                                        logicalDevice_(nullptr)
+                               Vulkan::SwapChain& swapChain) : pipeline_(nullptr),
+                                                                        logicalDevice_(swapChain.GetDevice())
     {
-      (void)context;
+
       std::ifstream vertShader(vertFileLocation, std::ios::binary), fragShader(fragFileLocation, std::ios::binary);
 
       //check if files are valuable
@@ -63,7 +63,7 @@ namespace Epsilon
 
       VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-      VkExtent2D vkscExtent = {0,0};
+      VkExtent2D vkscExtent = swapChain.GetExtent();
       ////////////////////////////////////////////////////
       /// Vertex Input Setup
       ////////////////////////////////////////////////////
@@ -204,7 +204,7 @@ namespace Epsilon
       graphicsPipelineInfo.pColorBlendState = &colorBlend;
       graphicsPipelineInfo.layout = layout_;
       graphicsPipelineInfo.pRasterizationState = &rasterizer;
-      graphicsPipelineInfo.renderPass =nullptr; //context.GetWindowRenderPass();
+      graphicsPipelineInfo.renderPass =swapChain.GetRenderPass(); //context.GetWindowRenderPass();
 
       if (vkCreateGraphicsPipelines(logicalDevice_, nullptr, 1, &graphicsPipelineInfo, nullptr, &pipeline_) !=
           VK_SUCCESS)

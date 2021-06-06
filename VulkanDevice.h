@@ -16,7 +16,8 @@ namespace Epsilon::Vulkan
         explicit Device(Instance &instance, const Surface& surface);
         [[nodiscard]] VkPhysicalDevice GetPhysicalHandle() const{return vkPhysDevice_;}
         [[nodiscard]] VkDevice GetLogicalHandle() const{ return vkLogicalDevice_;}
-
+        [[nodiscard]] VkQueue GetPresentQueue() const { return presentQueue_;}
+        [[nodiscard]] VkQueue GetGraphicsQueue() const { return graphicsQueue_;}
         ~Device();
         //no copies allowed
         Device& operator=(const Device& other) = delete;

@@ -21,4 +21,4 @@ find_package(Vulkan REQUIRED)
 target_compile_definitions(EpsilonRenderer PRIVATE VK_USE_PLATFORM_WIN32_KHR GLFW_INCLUDE_VULKAN GLFW_EXPOSE_NATIVE_WIN32)
 
 # link the available libraries
-target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan)
+target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp)

@@ -10,46 +10,24 @@
 #include "SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
 #include "VulkanInitializationException.h"
+#include "VulkanShader.h"
 
 namespace Epsilon::Vulkan
 {
-    SwapChain::SwapChain(const Device &device, const Surface &screen, GLFWwindow *window)
+    SwapChain::SwapChain(Device &device, Surface &screen, GLFWwindow *window)
+        : Device_(device), surface_(screen), windowHandle_(window)
     {
-      logicalDevice_ = device.GetLogicalHandle();
-      CreateSwapchainHandle(device, screen, window);
-      CreateImageViews(device);
-      CreateRenderPass();
-      CreateFrameBuffers();
-      CreateCommandPool(device,screen);
-      CreateSemaphores();
+      //create the swapchain and connect it to the window
+      Initialize();
     }
 
 
     SwapChain::~SwapChain()
     {
-      //destroy semaphores
-      vkDestroySemaphore(logicalDevice_, imageAvailableSemaphore, nullptr);
-      vkDestroySemaphore(logicalDevice_, renderFinishedSemaphore, nullptr);
-
-      //destroy the command pool
-      vkDestroyCommandPool(logicalDevice_, commandPool_, nullptr);
-
-      //destroy all framebuffers
-      for(auto frameBuffer: frameBuffers_)
-        vkDestroyFramebuffer(logicalDevice_, frameBuffer, nullptr);
-
-      //cleanup render pass
-      vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
-
-      //remove all the views associated with the swapchain
-      for(auto imageView: views_)
-        vkDestroyImageView(logicalDevice_, imageView, nullptr);
-
-      //destroy the swapchain
-      vkDestroySwapchainKHR(logicalDevice_, handle_, nullptr);
+      Cleanup();
     }
 
-    void SwapChain::CreateCommandPool(const Device& device, const Surface& screen)
+    void SwapChain::CreateCommandPool(const Device &device, const Surface &screen)
     {
       QueueFamilyIndices queueFamilyIndices(device.GetPhysicalHandle(), screen.GetSurfaceHandle());
 
@@ -58,9 +36,10 @@ namespace Epsilon::Vulkan
 
       //store the graphics index in the family
       info.queueFamilyIndex = queueFamilyIndices.graphicsInd_.value();
+      info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
       //create the command pool
-      if (vkCreateCommandPool(logicalDevice_, &info, nullptr, &commandPool_) != VK_SUCCESS)
+      if (vkCreateCommandPool(Device_.GetLogicalHandle(), &info, nullptr, &commandPool_) != VK_SUCCESS)
         throw std::runtime_error("VULKAN ERROR: Failed to create a command buffer!");
 
     }
@@ -123,7 +102,7 @@ namespace Epsilon::Vulkan
         framebufferInfo.layers = 1;
 
         //create the buffer
-        if (vkCreateFramebuffer(logicalDevice_, &framebufferInfo, nullptr, &frameBuffers_[i]) !=
+        if (vkCreateFramebuffer(Device_.GetLogicalHandle(), &framebufferInfo, nullptr, &frameBuffers_[i]) !=
             VK_SUCCESS)
           throw std::runtime_error("VULKAN ERROR: Failed to create a framebuffer!");
       }
@@ -141,50 +120,11 @@ namespace Epsilon::Vulkan
       info.commandBufferCount = static_cast<uint32_t>(commandBuffers_.size());
 
       //create the command buffer
-      if (vkAllocateCommandBuffers(logicalDevice_, &info, commandBuffers_.data()) != VK_SUCCESS)
+      if (vkAllocateCommandBuffers(Device_.GetLogicalHandle(), &info, commandBuffers_.data()) != VK_SUCCESS)
         throw std::runtime_error("VULKAN ERROR: UNABLE TO ALLOCATE COMMANDBUFFERS!");
 
-
-//      //start recording for command buffers
-//      for (int i = 0; i < vkCommandBuffers_.size(); i++)
-//      {
-//        //if i had a cent for every struct i've made in this project, i would have enough to buy a gun so i can end my misery
-//        VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-//
-//        //start the buffer for recording
-//        if (vkBeginCommandBuffer(vkCommandBuffers_[i], &cbinfo) != VK_SUCCESS)
-//          throw std::runtime_error("VULKAN ERROR: FAILED TO INITIALIZE COMMANDBUFFER!!!");
-//
-//        //start running the render pass
-//
-//        //another struct, another cent
-//        VkRenderPassBeginInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-//        renderPassInfo.renderPass = vkRenderPass_;
-//        renderPassInfo.framebuffer = vkSwapChainFramebuffers_[i];
-//
-//        renderPassInfo.renderArea.offset = {0, 0};
-//        renderPassInfo.renderArea.extent = vkscExtent;
-//
-//        //set the clear color for the texture
-//        VkClearValue clearColor = {0, 0, 0, 1};
-//
-//        renderPassInfo.clearValueCount = 1;
-//        renderPassInfo.pClearValues = &clearColor;
-//
-//        //set the render pass
-//        vkCmdBeginRenderPass(vkCommandBuffers_[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-//
-//        vkCmdBindPipeline(vkCommandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
-//        vkCmdDraw(vkCommandBuffers_[i], 3, 1, 0, 0);
-//        vkCmdEndRenderPass(vkCommandBuffers_[i]);
-//
-//
-//        if (vkEndCommandBuffer(vkCommandBuffers_[i]) != VK_SUCCESS)
-//          throw std::runtime_error("VULKAN ERROR: Failed to record command buffer!!!");
-//      }
-
-
     }
+
     VkSurfaceFormatKHR SwapChain::GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
     {
       //go through all the available formats
@@ -301,6 +241,7 @@ namespace Epsilon::Vulkan
         views_.push_back(view);
       }
     }
+
     void SwapChain::CreateRenderPass()
     {
       //setup the color attachemnt for 1 image that will be used for rendering
@@ -380,21 +321,191 @@ namespace Epsilon::Vulkan
       renderPassInfo.dependencyCount = 1;
 
       //create the render pass
-      if (vkCreateRenderPass(logicalDevice_, &renderPassInfo, nullptr, &renderPass_) != VK_SUCCESS)
+      if (vkCreateRenderPass(Device_.GetLogicalHandle(), &renderPassInfo, nullptr, &renderPass_) != VK_SUCCESS)
         throw InitializationException("VULKAN ERROR: Cannot create the proper render pass!!");
 
     }
+
     void SwapChain::CreateSemaphores()
     {
       //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
       VkSemaphoreCreateInfo semaphoreInfo{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
 
-      //create the semaphores
-      if (vkCreateSemaphore(logicalDevice_, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-          vkCreateSemaphore(logicalDevice_, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS)
-        throw InitializationException("VULKAN ERROR: Cannot create semaphores!!!");
+      //REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+      VkFenceCreateInfo fenceInfo{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+
+      //set the flag for fences
+      fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 
+      //initalize list
+      imageAvailableSemaphore_.resize(framesPerFlight);
+      renderFinishedSemaphore_.resize(framesPerFlight);
+      fences_.resize(framesPerFlight);
+      //create the semaphores and fences
+      for (int i = 0; i < framesPerFlight; i++)
+      {
+        if (vkCreateSemaphore(Device_.GetLogicalHandle(), &semaphoreInfo, nullptr, &imageAvailableSemaphore_[i]) !=
+            VK_SUCCESS ||
+            vkCreateSemaphore(Device_.GetLogicalHandle(), &semaphoreInfo, nullptr, &renderFinishedSemaphore_[i]) !=
+            VK_SUCCESS)
+          throw InitializationException("Cannot create semaphores!!!");
+
+        if (vkCreateFence(Device_.GetLogicalHandle(), &fenceInfo, nullptr, &fences_[i]) != VK_SUCCESS)
+          throw InitializationException("Cannot create proper fences!!!");
+      }
+
+    }
+
+    void SwapChain::Initialize()
+    {
+      CreateSwapchainHandle(Device_, surface_, windowHandle_);
+      CreateImageViews(Device_);
+      CreateRenderPass();
+      CreateFrameBuffers();
+      CreateCommandPool(Device_, surface_);
+      CreateCommandBuffers();
+      CreateSemaphores();
+      initialized_ = true;
+    }
+
+    void SwapChain::Cleanup()
+    {
+      //destroy semaphores
+      for (int i = 0; i < framesPerFlight; i++)
+      {
+        vkDestroySemaphore(Device_.GetLogicalHandle(), imageAvailableSemaphore_[i], nullptr);
+        vkDestroySemaphore(Device_.GetLogicalHandle(), renderFinishedSemaphore_[i], nullptr);
+        vkDestroyFence(Device_.GetLogicalHandle(), fences_[i], nullptr);
+      }
+      //destroy the command pool
+      vkDestroyCommandPool(Device_.GetLogicalHandle(), commandPool_, nullptr);
+
+      //destroy all framebuffers
+      for (auto frameBuffer: frameBuffers_)
+        vkDestroyFramebuffer(Device_.GetLogicalHandle(), frameBuffer, nullptr);
+
+      //cleanup render pass
+      vkDestroyRenderPass(Device_.GetLogicalHandle(), renderPass_, nullptr);
+
+      //remove all the views associated with the swapchain
+      for (auto imageView: views_)
+        vkDestroyImageView(Device_.GetLogicalHandle(), imageView, nullptr);
+
+      //destroy the swapchain
+      vkDestroySwapchainKHR(Device_.GetLogicalHandle(), handle_, nullptr);
+    }
+
+    void SwapChain::Present()
+    {
+
+      //wait until the current frame is ready for presentation
+
+
+      //get the next image
+
+
+      //this is fucking torture
+      VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+
+      //store a location of the necessary semaphore in a sendable format
+      VkSemaphore waitSemaphores[] = {imageAvailableSemaphore_[currentFrame_]};
+
+      //store the stage of the semaphore
+      VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+      //populate struct
+      submitInfo.waitSemaphoreCount = 1;
+
+      //send wait requirements
+      submitInfo.pWaitSemaphores = waitSemaphores;
+      submitInfo.pWaitDstStageMask = waitStages;
+
+      //send command buffers
+      submitInfo.commandBufferCount = 1;
+      submitInfo.pCommandBuffers = &commandBuffers_[currentFrame_];
+
+      //create the done timer in a sendable format
+      VkSemaphore signalSemaphore[] = {renderFinishedSemaphore_[currentFrame_]};
+      submitInfo.signalSemaphoreCount = 1;
+      submitInfo.pSignalSemaphores = signalSemaphore;
+      vkResetFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_]);
+      //create send the render request to the queue
+      if (vkQueueSubmit(Device_.GetGraphicsQueue(), 1, &submitInfo, fences_[currentFrame_]) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: Failed to submit the command buffer!!!");
+
+      VkPresentInfoKHR presentinfo{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
+
+      presentinfo.waitSemaphoreCount = 1;
+      presentinfo.pWaitSemaphores = signalSemaphore;
+
+      VkSwapchainKHR swapchains[] = {handle_};
+
+      presentinfo.swapchainCount = 1;
+
+      presentinfo.pSwapchains = swapchains;
+      presentinfo.pImageIndices = &imageIndex;
+
+      //show the value to the swapchain
+      vkQueuePresentKHR(Device_.GetPresentQueue(), &presentinfo);
+
+      currentFrame_ = (++currentFrame_) % framesPerFlight;
+
+
+
+
+    }
+
+    void SwapChain::ClearFrame()
+    {
+      //if i had a cent for every struct i've made in this project, i would have enough to buy a gun so i can end my misery
+      VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+      cbinfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+      //start the buffer for recording
+      vkWaitForFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_], true, UINT64_MAX);
+
+      vkResetCommandBuffer(commandBuffers_[currentFrame_], 0);
+      vkAcquireNextImageKHR(Device_.GetLogicalHandle(), handle_, UINT32_MAX, imageAvailableSemaphore_[currentFrame_],
+                            nullptr, &imageIndex);
+
+
+      if (vkBeginCommandBuffer(commandBuffers_[currentFrame_], &cbinfo) != VK_SUCCESS)
+        throw std::runtime_error("VULKAN ERROR: FAILED TO INITIALIZE COMMANDBUFFER!!!");
+
+      //start running the render pass
+
+      //another struct, another cent
+      VkRenderPassBeginInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
+      renderPassInfo.renderPass = renderPass_;
+      renderPassInfo.framebuffer = frameBuffers_[imageIndex];
+
+      renderPassInfo.renderArea.offset = {0, 0};
+      renderPassInfo.renderArea.extent = extent_;
+
+      //set the clear color for the texture
+      VkClearValue clearColor = {0, 0, 1, 1};
+
+      renderPassInfo.clearValueCount = 1;
+      renderPassInfo.pClearValues = &clearColor;
+
+      //set the render pass
+      vkCmdBeginRenderPass(commandBuffers_[currentFrame_], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
+    void SwapChain::RenderShader(VulkanShader *shader)
+    {
+      vkCmdBindPipeline(commandBuffers_[currentFrame_], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
+      vkCmdDraw(commandBuffers_[currentFrame_], 3, 1, 0, 0);
+
+    }
+
+    void SwapChain::FinishFrame()
+    {
+      vkCmdEndRenderPass(commandBuffers_[currentFrame_]);
+
+      if (vkEndCommandBuffer(commandBuffers_[currentFrame_]) != VK_SUCCESS)
+        throw std::runtime_error("Failed to record command buffer!!!");
     }
 
 }
