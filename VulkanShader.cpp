@@ -3,10 +3,9 @@
 //
 
 #include "VulkanShader.h"
-#include "VulkanContextWindow.h"
 #include <fstream>
 #include <vector>
-#include "VulkanSwapChain.h"
+#include "VulkanMeshHelper.h"
 
 VkShaderModule CreateModule(const std::vector<char> &data, VkDevice device)
 {
@@ -69,12 +68,17 @@ namespace Epsilon::Vulkan
       ////////////////////////////////////////////////////
       VkPipelineVertexInputStateCreateInfo vertexInfo{VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
 
+      //get the information of a vertex
+      auto attribdescriptions = GetVertexDescription();
+      auto bindingDescriptions = GetVertexBindingDescription();
       //set the vertex info
       //set the spacing between data and whether the data is per-vertex or per-instance
-      vertexInfo.vertexBindingDescriptionCount = 0;
+      vertexInfo.vertexBindingDescriptionCount = 1;
+      vertexInfo.pVertexBindingDescriptions = &bindingDescriptions;
 
       //set the number of attributes passed to the vertex
-      vertexInfo.vertexAttributeDescriptionCount = 0;
+      vertexInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribdescriptions.size());
+      vertexInfo.pVertexAttributeDescriptions = attribdescriptions.data();
       ////////////////////////////////////////////////////
       /// Input Assembly
       ////////////////////////////////////////////////////
