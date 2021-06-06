@@ -26,7 +26,6 @@ namespace Epsilon
     {
       //delete the renderer specification
       delete renderer_;
-
       //terminate glfw
       glfwTerminate();
     }
@@ -36,12 +35,15 @@ namespace Epsilon
       //run the program until the user wants it to close
       while(!renderer_->WillClose())
       {
+        //clear the previous frame
+        renderer_->StartFrame();
         //run any renderer specific actions
         Update();
-        renderer_->DrawFrame();
+        renderer_->EndFrame();
         //update glfw and any of its events
         glfwPollEvents();
       }
+
     }
 
     void Context::Update()

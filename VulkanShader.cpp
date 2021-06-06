@@ -23,10 +23,10 @@ VkShaderModule CreateModule(const std::vector<char> &data, VkDevice device)
 
 }
 
-namespace Epsilon
+namespace Epsilon::Vulkan
 {
-    VulkanShader::VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                               Vulkan::SwapChain& swapChain) : pipeline_(nullptr),
+    vkShader::vkShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
+                       Vulkan::SwapChain& swapChain) : pipeline_(nullptr),
                                                                         logicalDevice_(swapChain.GetDevice())
     {
 
@@ -215,14 +215,15 @@ namespace Epsilon
     }
 
 
-    VulkanShader::~VulkanShader()
+    vkShader::~vkShader()
     {
       vkDestroyPipeline(logicalDevice_, pipeline_, nullptr);
       vkDestroyPipelineLayout(logicalDevice_, layout_, nullptr);
     }
 
-    std::string VulkanShader::GetShaderType()
+    SpecificationType vkShader::GetShaderType() const
     {
-      return "Vulkan";
+      return SpecificationType::Vulkan;
     }
+
 }

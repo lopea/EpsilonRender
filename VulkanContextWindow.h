@@ -14,10 +14,6 @@
 #include "Shader.h"
 #include <optional>
 
-namespace Epsilon
-{
-    class VulkanShader;
-}
 
 namespace Epsilon::Vulkan
 {
@@ -27,14 +23,14 @@ namespace Epsilon::Vulkan
         ContextWindow(unsigned width, unsigned height);
 
         void Render(Shader);
-        std::string GetName() override;
-        void DrawFrame() override;
+        SpecificationType GetName() override;
+        void EndFrame() override;
+        void StartFrame() override;
     private:
         Instance instance_;
         Surface surface_;
         Device device_;
         SwapChain swapChain_;
-        VulkanShader* shader_;
 
         //! create the instance for this context renderer
         static GLFWwindow *CreateHandleWindow(unsigned width, unsigned height);

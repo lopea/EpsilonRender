@@ -6,7 +6,17 @@
 #define EPSILONRENDERER_SHADER_H
 
 #include <string>
-class Shader_{public: virtual std::string GetShaderType() = 0;};
-using Shader = Shader_*;
 
+namespace Epsilon
+{
+    enum class SpecificationType;
+
+    class Shader_
+    {
+    public:
+        virtual SpecificationType GetShaderType() const = 0;
+    };
+
+    using Shader = Shader_ *;
+}
 #endif //EPSILONRENDERER_SHADER_H

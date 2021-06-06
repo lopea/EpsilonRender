@@ -10,6 +10,11 @@ struct GLFWwindow;
 
 namespace Epsilon
 {
+    enum class SpecificationType
+    {
+        Vulkan,
+        OpenGL
+    };
 //! class that is the blueprint for renderers based on the render specification (GL, Vulkan, DirectX)
     class ContextWindow
     {
@@ -28,7 +33,7 @@ namespace Epsilon
         GLFWwindow *GetWindow(){return handle_;};
 
         //! @return Get the name of the render specification
-        virtual std::string GetName() = 0;
+        virtual SpecificationType GetName() = 0;
 
         //! making sure destructors work for derived classes
         virtual ~ContextWindow(){ glfwDestroyWindow(handle_); handle_ = nullptr; }
@@ -43,7 +48,9 @@ namespace Epsilon
         ContextWindow& operator=(const ContextWindow& other) = delete;
 
         //! draws all data to the screen
-        virtual void DrawFrame() = 0;
+        virtual void EndFrame() = 0;
+
+        virtual void StartFrame() = 0;
 
 
     protected:

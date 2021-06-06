@@ -24,6 +24,7 @@ namespace Epsilon::Vulkan
 
     SwapChain::~SwapChain()
     {
+
       Cleanup();
     }
 
@@ -371,6 +372,9 @@ namespace Epsilon::Vulkan
 
     void SwapChain::Cleanup()
     {
+      //wait until data is not used anymore
+      vkDeviceWaitIdle(Device_.GetLogicalHandle());
+
       //destroy semaphores
       for (int i = 0; i < framesPerFlight; i++)
       {
@@ -493,7 +497,7 @@ namespace Epsilon::Vulkan
       vkCmdBeginRenderPass(commandBuffers_[currentFrame_], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    void SwapChain::RenderShader(VulkanShader *shader)
+    void SwapChain::RenderShader(vkShader *shader)
     {
       vkCmdBindPipeline(commandBuffers_[currentFrame_], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
       vkCmdDraw(commandBuffers_[currentFrame_], 3, 1, 0, 0);

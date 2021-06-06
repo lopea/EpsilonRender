@@ -9,13 +9,10 @@
 #include <vector>
 #include "VulkanDevice.h"
 
-namespace Epsilon
-{
-    class VulkanShader;
-}
+
 namespace Epsilon::Vulkan
 {
-
+    class vkShader;
     //! Represents the buffer that is used to render to the screen
     class SwapChain
     {
@@ -27,7 +24,7 @@ namespace Epsilon::Vulkan
         void Present();
         void ClearFrame();
         void FinishFrame();
-        void RenderShader(VulkanShader* shader);
+        void RenderShader(vkShader* shader);
         [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
 

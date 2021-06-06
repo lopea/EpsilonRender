@@ -10,20 +10,20 @@
 #include "vulkan/vulkan.h"
 #include "VulkanContextWindow.h"
 
-namespace Epsilon
+namespace Epsilon::Vulkan
 {
-    class VulkanShader : public Shader_
+    class vkShader : public Shader_
     {
     public:
-        std::string GetShaderType() override;
+        [[nodiscard]] SpecificationType GetShaderType() const override;
 
-        VulkanShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
-                     Vulkan::SwapChain& swapChain_);
+        vkShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
+                 Vulkan::SwapChain& swapChain_);
 
-        VkPipeline GetPipeline() const
+        [[nodiscard]] VkPipeline GetPipeline() const
         { return pipeline_; }
 
-        ~VulkanShader();
+        ~vkShader();
 
     private:
 
