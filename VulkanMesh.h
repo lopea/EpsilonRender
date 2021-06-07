@@ -8,6 +8,7 @@
 
 #include "Mesh.h"
 #include "VulkanDevice.h"
+#include "VulkanBuffer.h"
 #include <vulkan/vulkan.h>
 
 namespace Epsilon::Vulkan
@@ -18,22 +19,20 @@ namespace Epsilon::Vulkan
         template<typename VertContainer, typename IndContainer>
         vkMesh(const VertContainer& verts, const IndContainer& indices, Device& device);
 
-        ~vkMesh();
     private:
         Device& device_;
-        VkBuffer vertexBuffer_;
-        VkDeviceMemory vertexBufferMemory_;
+        Buffer vertexBuffer, stageBuffer;
 
-        void CreateVertexBuffer();
-        void CreateIndexBuffer();
-        uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     };
 
     template<typename VertContainer, typename IndContainer>
-    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device):vkMesh(verts, indices), device_(device)
+    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device): Epsilon::Mesh_(verts, indices),
+    device_(device),
+    vertexBuffer(device_, vertices_.size() * sizeof(vertices_[0]), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
     {
-      CreateVertexBuffer();
-      CreateIndexBuffer();
+      //set the data in the buffer
+      vertexBuffer.SetData(vertices_.data(),vertices_.size() * sizeof(vertices_[0]));
     }
 
 }

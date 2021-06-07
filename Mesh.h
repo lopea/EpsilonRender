@@ -25,6 +25,7 @@ namespace Epsilon
     {
     public:
 
+        virtual ~Mesh_() = default;
         /*!
          * Create a mesh with a set of vertices and indices for those vertices
          * @tparam VertContainer the type of the container for the vertices ( needs a .begin() and a .end() )
