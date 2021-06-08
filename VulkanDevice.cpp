@@ -6,7 +6,7 @@
 #include <vector>
 #include <set>
 #include "VulkanDevice.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
 #include "SwapChainContext.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"

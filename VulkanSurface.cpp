@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include "VulkanSurface.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
 
 namespace Epsilon::Vulkan
 {

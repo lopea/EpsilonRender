@@ -9,7 +9,7 @@
 #include "VulkanSurface.h"
 #include "SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
 #include "VulkanShader.h"
 
 namespace Epsilon::Vulkan

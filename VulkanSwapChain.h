@@ -9,6 +9,7 @@
 #include <vector>
 #include "VulkanDevice.h"
 
+struct GLFWwindow;
 
 namespace Epsilon::Vulkan
 {
@@ -27,6 +28,7 @@ namespace Epsilon::Vulkan
         void RenderShader(vkShader* shader);
         [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
+        [[nodiscard]] VkCommandPool GetCommnandPool() const { return commandPool_; }
 
     private:
 

@@ -9,7 +9,11 @@
 
 namespace Epsilon::Vulkan
 {
+    //forward declarations
     class Device;
+    class SwapChain;
+
+    // A block of memory for Vulkan related purposes
     class Buffer
     {
     public:
@@ -21,7 +25,7 @@ namespace Epsilon::Vulkan
          * @param usage shows how the buffer will be used
          * @param memFlags how the buffer will be allocated
          */
-        Buffer(Device& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags);
+        Buffer(Device& device, SwapChain& chain, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags);
 
         /*!
          * Add data from CPU memory and add it Buffer
@@ -59,6 +63,9 @@ namespace Epsilon::Vulkan
     private:
         //! store reference to the device that handles all vulkan operations
         Device& device_;
+
+        //! store the swapchain to get acess to the command pool
+        SwapChain& chain_;
 
         //! store the location of the buffer that vulkan gives us
         VkBuffer handle_{};

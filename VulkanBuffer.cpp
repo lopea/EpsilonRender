@@ -4,12 +4,13 @@
 
 #include "VulkanBuffer.h"
 #include "VulkanDevice.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
+#include "VulkanSwapChain.h"
 
 namespace Epsilon::Vulkan
 {
-    Buffer::Buffer(Device& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags)
-    : device_(device), handle_(nullptr), memoryHandle_(nullptr), size_(size), usage_(usage), memFlags_(memFlags)
+    Buffer::Buffer(Device& device, SwapChain& chain, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags)
+    : device_(device), chain_(chain), handle_(nullptr), memoryHandle_(nullptr), size_(size), usage_(usage), memFlags_(memFlags)
     {
       //start setting up vertex initialization
       VkBufferCreateInfo info {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -92,10 +93,44 @@ namespace Epsilon::Vulkan
 
     void Buffer::CopyBuffer(const Buffer &other)
     {
+      (void) other;
       //create a command buffer for this operation
       VkCommandBufferAllocateInfo cbInfo {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
       cbInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+      cbInfo.commandPool = chain_.GetCommnandPool();
+      cbInfo.commandBufferCount = 1;
 
-      //TODO:
+      //allocate the command buffer
+      VkCommandBuffer commandBuffer;
+      vkAllocateCommandBuffers(device_.GetLogicalHandle(), &cbInfo, &commandBuffer);
+
+      //start writing to the buffer
+      VkCommandBufferBeginInfo beginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+      beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+      //start writing to the command buffer
+      vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+      //create a info struct for coping buffers
+      VkBufferCopy copyInfo {};
+      copyInfo.size = min(size_, other.size_);
+
+      //start copying the buffer
+      vkCmdCopyBuffer(commandBuffer, other.handle_, handle_, 1, &copyInfo);
+
+      //stop writing to the command buffer
+      vkEndCommandBuffer(commandBuffer);
+
+      //submit the command for execution
+      VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+      submitInfo.commandBufferCount = 1;
+      submitInfo.pCommandBuffers = &commandBuffer;
+
+      //start copy
+      vkQueueSubmit(device_.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+      vkQueueWaitIdle(device_.GetGraphicsQueue());
+
+      //free the command buffer
+      vkFreeCommandBuffers(device_.GetLogicalHandle(), chain_.GetCommnandPool(), 1, &commandBuffer);
     }
 }

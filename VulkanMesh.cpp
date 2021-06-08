@@ -3,7 +3,7 @@
 //
 
 #include "VulkanMesh.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
 
 namespace Epsilon::Vulkan
 {

@@ -3,7 +3,7 @@
 //
 
 #include "VulkanInstance.h"
-#include "VulkanInitializationException.h"
+#include "VulkanException.h"
 #include "SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
 #include <vector>

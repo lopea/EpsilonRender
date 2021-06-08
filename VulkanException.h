@@ -2,8 +2,8 @@
 // Created by Javier on 6/4/2021.
 //
 
-#ifndef EPSILONRENDERER_VULKANINITIALIZATIONEXCEPTION_H
-#define EPSILONRENDERER_VULKANINITIALIZATIONEXCEPTION_H
+#ifndef EPSILONRENDERER_VULKANEXCEPTION_H
+#define EPSILONRENDERER_VULKANEXCEPTION_H
 
 #include <exception>
 #include <stdexcept>
@@ -18,6 +18,14 @@ namespace Epsilon::Vulkan
             : std::runtime_error("VULKAN CRITICAL INIT ERROR: " + msg)
         {}
     };
+
+    class RuntimeException : public std::runtime_error
+    {
+    public:
+        explicit RuntimeException(const std::string& msg):
+            std::runtime_error("Vulkan Critical Runtime Error: " + msg){}
+
+    };
 }
 
-#endif //EPSILONRENDERER_VULKANINITIALIZATIONEXCEPTION_H
+#endif //EPSILONRENDERER_VULKANEXCEPTION_H
