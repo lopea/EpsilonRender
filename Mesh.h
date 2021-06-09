@@ -36,7 +36,7 @@ namespace Epsilon
         template<typename VertContainer, typename IndContainer>
         Mesh_(const VertContainer& vertices, const IndContainer& indices)
         :vertices_(vertices.begin(), vertices.end()),
-        indices_(indices.begin(), indices.end()){};
+        indices_(indices.begin(), indices.end()){}
 
         [[nodiscard]] std::vector<Vertex> GetVertices() const{ return vertices_;}
         [[nodiscard]] std::vector<uint64_t> GetIndices() const { return indices_;}

@@ -2,6 +2,7 @@
 // Created by Javier on 6/7/2021.
 //
 
+#include <cstring>
 #include "VulkanBuffer.h"
 #include "VulkanDevice.h"
 #include "VulkanException.h"
@@ -113,7 +114,7 @@ namespace Epsilon::Vulkan
 
       //create a info struct for coping buffers
       VkBufferCopy copyInfo {};
-      copyInfo.size = min(size_, other.size_);
+      copyInfo.size = std::min(size_, other.size_);
 
       //start copying the buffer
       vkCmdCopyBuffer(commandBuffer, other.handle_, handle_, 1, &copyInfo);

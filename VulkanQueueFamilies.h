@@ -29,7 +29,7 @@ namespace Epsilon::Vulkan
          * @param device if the device contains all the proper families to be considered complete,
          * the function will return a complete family queue. Otherwise, the queue returned will be incomplete
          */
-        explicit QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface)
+        explicit QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface) : graphicsInd_(), presentInd_()
         {
 
           uint32_t indexCount;

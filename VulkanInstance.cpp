@@ -9,6 +9,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cstring>
 
 namespace Epsilon::Vulkan
 {
@@ -156,7 +157,7 @@ namespace Epsilon::Vulkan
       info.pEngineName = "Epsilon Engine";
 
       //set the version of the vulkan instance and of our engine
-      info.engineVersion = VK_MAKE_API_VERSION(1, 0, 1, 0);
+      info.engineVersion = VK_MAKE_VERSION(1, 0, 1);
       info.apiVersion = VK_API_VERSION_1_2;
 
       //store the information needed to create an instance
@@ -204,8 +205,6 @@ namespace Epsilon::Vulkan
 #endif
       //cleanup the instance
       vkDestroyInstance(vkInstance_, nullptr);
-
-
 
     }
 

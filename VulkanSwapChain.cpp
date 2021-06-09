@@ -145,8 +145,6 @@ namespace Epsilon::Vulkan
     {
       SwapChainContext context(device.GetPhysicalHandle(), surface.GetSurfaceHandle());
       unsigned imageCount = context.capabilities.minImageCount + 1;
-      if (context.capabilities.minImageCount > 0 && imageCount > context.capabilities.maxImageCount)
-        imageCount = context.capabilities.maxImageCount;
       //create a struct for creating a swapchain
       VkSwapchainCreateInfoKHR info{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
 
@@ -398,6 +396,12 @@ namespace Epsilon::Vulkan
 
       //destroy the swapchain
       vkDestroySwapchainKHR(Device_.GetLogicalHandle(), handle_, nullptr);
+
+      frameBuffers_.clear();
+      views_.clear();
+      frameBuffers_.clear();
+      fences_.clear();
+
     }
 
     void SwapChain::Present()
@@ -451,11 +455,17 @@ namespace Epsilon::Vulkan
       presentinfo.pImageIndices = &imageIndex;
 
       //show the value to the swapchain
-      vkQueuePresentKHR(Device_.GetPresentQueue(), &presentinfo);
+      VkResult result = vkQueuePresentKHR(Device_.GetPresentQueue(), &presentinfo);
 
-      currentFrame_ = (++currentFrame_) % framesPerFlight;
+      if(result == VK_ERROR_OUT_OF_DATE_KHR ||result == VK_SUBOPTIMAL_KHR)
+        Refresh();
+      else if(result != VK_SUCCESS)
+        throw RuntimeException("Unable to present swapchain image!");
+      //start the buffer for recording
+      vkWaitForFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_], true, UINT64_MAX);
 
-
+      currentFrame_ ++;
+      currentFrame_ %= framesPerFlight;
 
 
     }
@@ -466,8 +476,7 @@ namespace Epsilon::Vulkan
       VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
       cbinfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-      //start the buffer for recording
-      vkWaitForFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_], true, UINT64_MAX);
+
 
       vkResetCommandBuffer(commandBuffers_[currentFrame_], 0);
       vkAcquireNextImageKHR(Device_.GetLogicalHandle(), handle_, UINT32_MAX, imageAvailableSemaphore_[currentFrame_],
@@ -510,6 +519,12 @@ namespace Epsilon::Vulkan
 
       if (vkEndCommandBuffer(commandBuffers_[currentFrame_]) != VK_SUCCESS)
         throw std::runtime_error("Failed to record command buffer!!!");
+    }
+
+    void SwapChain::Refresh()
+    {
+      Cleanup();
+      Initialize();
     }
 
 }

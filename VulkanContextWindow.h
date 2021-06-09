@@ -26,6 +26,7 @@ namespace Epsilon::Vulkan
         SpecificationType GetName() override;
         void EndFrame() override;
         void StartFrame() override;
+        void OnResize(unsigned int width, unsigned int height) override;
     private:
         Instance instance_;
         Surface surface_;

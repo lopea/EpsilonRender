@@ -4,8 +4,10 @@
 
 #ifndef EPSILONRENDERER_CONTEXTWINDOW_H
 #define EPSILONRENDERER_CONTEXTWINDOW_H
+
 #include <string>
 #include <GLFW/glfw3.h>
+
 struct GLFWwindow;
 
 namespace Epsilon
@@ -15,6 +17,7 @@ namespace Epsilon
         Vulkan,
         OpenGL
     };
+
 //! class that is the blueprint for renderers based on the render specification (GL, Vulkan, DirectX)
     class ContextWindow
     {
@@ -26,41 +29,61 @@ namespace Epsilon
          * @param height the height of the window in pixel units
          * @param window window handle that will connected by this context class
          */
-        ContextWindow(unsigned width, unsigned height, GLFWwindow* window = nullptr)
-        : width_(width), height_(height), handle_(window){}
+        ContextWindow(unsigned width, unsigned height, GLFWwindow *window = nullptr)
+            : handle_(window), width_(width), height_(height)
+        {if(handle_) PopulateGLFWHandle();}
 
         //! @return the handle associated with this window
-        GLFWwindow *GetWindow(){return handle_;};
+        GLFWwindow *GetWindow()
+        { return handle_; };
 
         //! @return Get the name of the render specification
         virtual SpecificationType GetName() = 0;
 
         //! making sure destructors work for derived classes
-        virtual ~ContextWindow(){ glfwDestroyWindow(handle_); handle_ = nullptr; }
+        virtual ~ContextWindow()
+        {
+          glfwDestroyWindow(handle_);
+          handle_ = nullptr;
+        }
 
-        [[nodiscard]] unsigned GetWidth() const { return width_;}
-        [[nodiscard]] unsigned GetHeight() const { return height_;}
+        [[nodiscard]] unsigned GetWidth() const
+        { return width_; }
 
-        [[nodiscard]] bool WillClose() const { if(!handle_) return true; return glfwWindowShouldClose(handle_);}
+        [[nodiscard]] unsigned GetHeight() const
+        { return height_; }
+
+        [[nodiscard]] bool WillClose() const
+        {
+          if (!handle_) return true;
+          return glfwWindowShouldClose(handle_);
+        }
 
         //delete any use of copy constructors, assignment operators,etc.
-        ContextWindow(const ContextWindow& other) = delete;
-        ContextWindow& operator=(const ContextWindow& other) = delete;
+        ContextWindow(const ContextWindow &other) = delete;
+
+        ContextWindow &operator=(const ContextWindow &other) = delete;
 
         //! draws all data to the screen
         virtual void EndFrame() = 0;
 
         virtual void StartFrame() = 0;
 
+        virtual void OnResize(unsigned width, unsigned height)
+        {}
+
 
     protected:
-        void SetWindowHandle(GLFWwindow* newWindow) { handle_ = newWindow;};
+        void SetWindowHandle(GLFWwindow *newWindow);
+
     private:
-        GLFWwindow* handle_;
+        GLFWwindow *handle_;
         //! width of the renderer
         unsigned width_;
         //! height of the window the renderer will use
         unsigned height_;
+
+        void PopulateGLFWHandle();
     };
 }
 

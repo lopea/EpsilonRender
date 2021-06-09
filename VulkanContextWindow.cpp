@@ -55,6 +55,9 @@ namespace Epsilon::Vulkan
       swapChain_.FinishFrame();
       //show the current frame in the swap chain and swap buffers
       swapChain_.Present();
+
+      //check if the swapchain needs updating
+
     }
 
     void ContextWindow::Render(Shader shader)
@@ -75,6 +78,11 @@ namespace Epsilon::Vulkan
     {
       //clear the selected frame buffer
       swapChain_.ClearFrame();
+    }
+
+    void ContextWindow::OnResize(unsigned int width, unsigned int height)
+    {
+      swapChain_.Refresh();
     }
 
 }

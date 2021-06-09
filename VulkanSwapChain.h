@@ -26,6 +26,7 @@ namespace Epsilon::Vulkan
         void ClearFrame();
         void FinishFrame();
         void RenderShader(vkShader* shader);
+        void Refresh();
         [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
         [[nodiscard]] VkCommandPool GetCommnandPool() const { return commandPool_; }
