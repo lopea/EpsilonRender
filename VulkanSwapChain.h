@@ -26,17 +26,17 @@ namespace Epsilon::Vulkan
         void ClearFrame();
         void FinishFrame();
         void RenderShader(vkShader* shader);
-        void Refresh();
+
         [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
         [[nodiscard]] VkCommandPool GetCommnandPool() const { return commandPool_; }
 
+        void MarkForRefresh();
     private:
 
         Device& Device_;
         Surface& surface_;
         GLFWwindow *windowHandle_;
-
         VkFormat format_;
         VkSwapchainKHR handle_;
         std::vector<VkImage> images_;
@@ -53,7 +53,11 @@ namespace Epsilon::Vulkan
         //store the next image for rendering
         uint32_t imageIndex = 0;
 
-        bool initialized_ = false;
+        //! check if the swapchain is not up to date with the surface and needs to be recreated
+        bool needsRefresh = false;
+
+        //! check if the swapchain is not valid for rendering (having a screen size of zero or minimized)
+        bool allowRendering = true;
 
         VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availableModes);
 
@@ -78,6 +82,7 @@ namespace Epsilon::Vulkan
 
         void Initialize();
         void Cleanup();
+        void Refresh();
 
     };
 }

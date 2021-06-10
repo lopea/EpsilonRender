@@ -365,7 +365,7 @@ namespace Epsilon::Vulkan
       CreateCommandPool(Device_, surface_);
       CreateCommandBuffers();
       CreateSemaphores();
-      initialized_ = true;
+
     }
 
     void SwapChain::Cleanup()
@@ -406,76 +406,98 @@ namespace Epsilon::Vulkan
 
     void SwapChain::Present()
     {
+      if(allowRendering)
+      {
+        //this is fucking torture
+        VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
 
-      //wait until the current frame is ready for presentation
+        //store a location of the necessary semaphore in a sendable format
+        VkSemaphore waitSemaphores[] = {imageAvailableSemaphore_[currentFrame_]};
 
+        //store the stage of the semaphore
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-      //get the next image
+        //populate struct
+        submitInfo.waitSemaphoreCount = 1;
 
+        //send wait requirements
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
 
-      //this is fucking torture
-      VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        //send command buffers
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffers_[currentFrame_];
 
-      //store a location of the necessary semaphore in a sendable format
-      VkSemaphore waitSemaphores[] = {imageAvailableSemaphore_[currentFrame_]};
+        //create the done timer in a sendable format
+        VkSemaphore signalSemaphore[] = {renderFinishedSemaphore_[currentFrame_]};
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphore;
+        vkResetFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_]);
+        //create send the render request to the queue
+        if (vkQueueSubmit(Device_.GetGraphicsQueue(), 1, &submitInfo, fences_[currentFrame_]) != VK_SUCCESS)
+          throw std::runtime_error("VULKAN ERROR: Failed to submit the command buffer!!!");
 
-      //store the stage of the semaphore
-      VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        VkPresentInfoKHR presentinfo{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
 
-      //populate struct
-      submitInfo.waitSemaphoreCount = 1;
+        presentinfo.waitSemaphoreCount = 1;
+        presentinfo.pWaitSemaphores = signalSemaphore;
 
-      //send wait requirements
-      submitInfo.pWaitSemaphores = waitSemaphores;
-      submitInfo.pWaitDstStageMask = waitStages;
+        VkSwapchainKHR swapchains[] = {handle_};
 
-      //send command buffers
-      submitInfo.commandBufferCount = 1;
-      submitInfo.pCommandBuffers = &commandBuffers_[currentFrame_];
+        presentinfo.swapchainCount = 1;
 
-      //create the done timer in a sendable format
-      VkSemaphore signalSemaphore[] = {renderFinishedSemaphore_[currentFrame_]};
-      submitInfo.signalSemaphoreCount = 1;
-      submitInfo.pSignalSemaphores = signalSemaphore;
-      vkResetFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_]);
-      //create send the render request to the queue
-      if (vkQueueSubmit(Device_.GetGraphicsQueue(), 1, &submitInfo, fences_[currentFrame_]) != VK_SUCCESS)
-        throw std::runtime_error("VULKAN ERROR: Failed to submit the command buffer!!!");
+        presentinfo.pSwapchains = swapchains;
+        presentinfo.pImageIndices = &imageIndex;
 
-      VkPresentInfoKHR presentinfo{VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
+        //show the value to the swapchain
+        VkResult result = vkQueuePresentKHR(Device_.GetPresentQueue(), &presentinfo);
 
-      presentinfo.waitSemaphoreCount = 1;
-      presentinfo.pWaitSemaphores = signalSemaphore;
+        //check if the swap chain needs to be recreated due to a window change
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || needsRefresh)
+        {
+          //get the size of the new window
+          int width, height;
+          glfwGetFramebufferSize(windowHandle_, &width, &height);
 
-      VkSwapchainKHR swapchains[] = {handle_};
+          //check if rendering is allowed
+          allowRendering = !(width == 0 || height == 0);
 
-      presentinfo.swapchainCount = 1;
+          //update the swap chain if rendering is continuing
+          if (allowRendering)
+            Refresh();
+        } else if (result != VK_SUCCESS)
+          throw RuntimeException("Unable to present swapchain image!");
 
-      presentinfo.pSwapchains = swapchains;
-      presentinfo.pImageIndices = &imageIndex;
+        //start the buffer for recording
+        vkWaitForFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_], true, UINT64_MAX);
 
-      //show the value to the swapchain
-      VkResult result = vkQueuePresentKHR(Device_.GetPresentQueue(), &presentinfo);
+        currentFrame_++;
+        currentFrame_ %= framesPerFlight;
+      }
+      else if (needsRefresh)
+      {
+        //get the size of the new window
+        int width, height;
+        glfwGetFramebufferSize(windowHandle_, &width, &height);
 
-      if(result == VK_ERROR_OUT_OF_DATE_KHR ||result == VK_SUBOPTIMAL_KHR)
-        Refresh();
-      else if(result != VK_SUCCESS)
-        throw RuntimeException("Unable to present swapchain image!");
-      //start the buffer for recording
-      vkWaitForFences(Device_.GetLogicalHandle(), 1, &fences_[currentFrame_], true, UINT64_MAX);
+        //check if rendering is allowed
+        allowRendering = !(width == 0 || height == 0);
 
-      currentFrame_ ++;
-      currentFrame_ %= framesPerFlight;
-
+        //update the swap chain if rendering is continuing
+        if (allowRendering)
+          Refresh();
+      }
 
     }
 
     void SwapChain::ClearFrame()
     {
+      //dont do anything if the swapchain cant render
+      if (!allowRendering)
+        return;
       //if i had a cent for every struct i've made in this project, i would have enough to buy a gun so i can end my misery
       VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
       cbinfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
 
 
       vkResetCommandBuffer(commandBuffers_[currentFrame_], 0);
@@ -508,6 +530,10 @@ namespace Epsilon::Vulkan
 
     void SwapChain::RenderShader(vkShader *shader)
     {
+      //dont do anything if swapchain cant render
+      if (!allowRendering)
+        return;
+
       vkCmdBindPipeline(commandBuffers_[currentFrame_], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
       vkCmdDraw(commandBuffers_[currentFrame_], 3, 1, 0, 0);
 
@@ -515,6 +541,10 @@ namespace Epsilon::Vulkan
 
     void SwapChain::FinishFrame()
     {
+      //dont render anything if the swapchain cant present anything
+      if (!allowRendering)
+        return;
+
       vkCmdEndRenderPass(commandBuffers_[currentFrame_]);
 
       if (vkEndCommandBuffer(commandBuffers_[currentFrame_]) != VK_SUCCESS)
@@ -523,8 +553,19 @@ namespace Epsilon::Vulkan
 
     void SwapChain::Refresh()
     {
+      //clear all data for the swap chain
       Cleanup();
+
+      //recreate it with the new values
       Initialize();
+
+      //clear refresh flag
+      needsRefresh = false;
+    }
+
+    void SwapChain::MarkForRefresh()
+    {
+      needsRefresh = true;
     }
 
 }

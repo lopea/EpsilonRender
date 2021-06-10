@@ -70,7 +70,7 @@ namespace Epsilon
         virtual void StartFrame() = 0;
 
         virtual void OnResize(unsigned width, unsigned height)
-        {}
+            {(void)width;(void)height;}
 
 
     protected:

@@ -114,7 +114,11 @@ namespace Epsilon::Vulkan
 
       //create a info struct for coping buffers
       VkBufferCopy copyInfo {};
+#ifdef _MSC_VER
+      copyInfo.size = min(size_, other.size_);
+#else
       copyInfo.size = std::min(size_, other.size_);
+#endif
 
       //start copying the buffer
       vkCmdCopyBuffer(commandBuffer, other.handle_, handle_, 1, &copyInfo);

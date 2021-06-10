@@ -53,6 +53,7 @@ namespace Epsilon::Vulkan
     {
       //stop the swapchain from receiving messages
       swapChain_.FinishFrame();
+
       //show the current frame in the swap chain and swap buffers
       swapChain_.Present();
 
@@ -82,7 +83,11 @@ namespace Epsilon::Vulkan
 
     void ContextWindow::OnResize(unsigned int width, unsigned int height)
     {
-      swapChain_.Refresh();
+      (void)width;
+      (void)height;
+
+      //recreate the swapchain
+      swapChain_.MarkForRefresh();
     }
 
 }
