@@ -6,12 +6,12 @@
 #define EPSILONRENDERER_VULKANCONTEXTWINDOW_H
 
 #include <vector>
-#include "ContextWindow.h"
+#include "../ContextWindow.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
-#include "Shader.h"
+#include "../Shader.h"
 #include <optional>
 
 

@@ -4,7 +4,7 @@
 
 #include "VulkanInstance.h"
 #include "VulkanException.h"
-#include "SwapChainContext.h"
+#include "../SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
 #include <vector>
 #include <GLFW/glfw3.h>

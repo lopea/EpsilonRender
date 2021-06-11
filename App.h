@@ -2,8 +2,8 @@
 // Created by Javier on 5/27/2021.
 //
 
-#ifndef EPSILONRENDERER_CONTEXT_H
-#define EPSILONRENDERER_CONTEXT_H
+#ifndef EPSILONRENDERER_APP_H
+#define EPSILONRENDERER_APP_H
 
 
 #include <GLFW/glfw3.h>
@@ -13,12 +13,12 @@
 namespace Epsilon
 {
     //! Handles any high-level functions including any glfw functionality
-    class Context
+    class App
     {
     public:
-        Context(unsigned width, unsigned height);
+        App(unsigned width, unsigned height);
 
-        ~Context();
+        ~App();
 
         void Run();
 
@@ -30,4 +30,4 @@ namespace Epsilon
     };
 }
 
-#endif //EPSILONRENDERER_CONTEXT_H
+#endif //EPSILONRENDERER_APP_H

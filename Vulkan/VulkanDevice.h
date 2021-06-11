@@ -5,6 +5,8 @@
 #ifndef EPSILONRENDERER_VULKANDEVICE_H
 #define EPSILONRENDERER_VULKANDEVICE_H
 #include <vulkan/vulkan.h>
+#include "VulkanQueueFamilies.h"
+
 
 namespace Epsilon::Vulkan
 {
@@ -18,6 +20,8 @@ namespace Epsilon::Vulkan
         [[nodiscard]] VkDevice GetLogicalHandle() const{ return vkLogicalDevice_;}
         [[nodiscard]] VkQueue GetPresentQueue() const { return presentQueue_;}
         [[nodiscard]] VkQueue GetGraphicsQueue() const { return graphicsQueue_;}
+        [[nodiscard]] uint32_t GetGraphicsIndices() const { return family.graphicsInd_.value();}
+        [[nodiscard]] uint32_t GetPresentIndices() const { return family.presentInd_.value();}
         ~Device();
         //no copies allowed
         Device& operator=(const Device& other) = delete;
@@ -30,6 +34,7 @@ namespace Epsilon::Vulkan
         VkPhysicalDevice vkPhysDevice_;
         VkDevice vkLogicalDevice_;
         VkQueue presentQueue_, graphicsQueue_;
+        QueueFamilyIndices family;
 
         bool CheckDeviceExtensionCompatibility(VkPhysicalDevice Device);
 

@@ -7,7 +7,7 @@
 #include "VulkanSwapChain.h"
 #include "VulkanDevice.h"
 #include "VulkanSurface.h"
-#include "SwapChainContext.h"
+#include "../SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
 #include "VulkanException.h"
 #include "VulkanShader.h"
@@ -19,31 +19,18 @@ namespace Epsilon::Vulkan
     {
       //create the swapchain and connect it to the window
       Initialize();
+      DescriptorPool_ = new DescriptorPool(device);
     }
 
 
     SwapChain::~SwapChain()
     {
+      delete DescriptorPool_;
 
       Cleanup();
     }
 
-    void SwapChain::CreateCommandPool(const Device &device, const Surface &screen)
-    {
-      QueueFamilyIndices queueFamilyIndices(device.GetPhysicalHandle(), screen.GetSurfaceHandle());
 
-      //another struct on the list
-      VkCommandPoolCreateInfo info{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
-
-      //store the graphics index in the family
-      info.queueFamilyIndex = queueFamilyIndices.graphicsInd_.value();
-      info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-      //create the command pool
-      if (vkCreateCommandPool(Device_.GetLogicalHandle(), &info, nullptr, &commandPool_) != VK_SUCCESS)
-        throw std::runtime_error("VULKAN ERROR: Failed to create a command buffer!");
-
-    }
 
     VkPresentModeKHR SwapChain::GetSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availableModes)
     {
@@ -95,7 +82,7 @@ namespace Epsilon::Vulkan
         VkFramebufferCreateInfo framebufferInfo{VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
 
         //populate the struct
-        framebufferInfo.renderPass = renderPass_;
+        framebufferInfo.renderPass = renderPass_->GetHandle();
         framebufferInfo.attachmentCount = 1;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = extent_.width;
@@ -103,28 +90,12 @@ namespace Epsilon::Vulkan
         framebufferInfo.layers = 1;
 
         //create the buffer
-        if (vkCreateFramebuffer(Device_.GetLogicalHandle(), &framebufferInfo, nullptr, &frameBuffers_[i]) !=
-            VK_SUCCESS)
+        if (vkCreateFramebuffer(Device_.GetLogicalHandle(),
+                                &framebufferInfo, nullptr, &frameBuffers_[i]) !=VK_SUCCESS)
           throw std::runtime_error("VULKAN ERROR: Failed to create a framebuffer!");
       }
     }
 
-    void SwapChain::CreateCommandBuffers()
-    {
-      //resize the buffers based on the frame buffers
-      commandBuffers_.resize(frameBuffers_.size());
-
-      //please end my suffering with all these structs!!!!
-      VkCommandBufferAllocateInfo info{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
-      info.commandPool = commandPool_;
-      info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-      info.commandBufferCount = static_cast<uint32_t>(commandBuffers_.size());
-
-      //create the command buffer
-      if (vkAllocateCommandBuffers(Device_.GetLogicalHandle(), &info, commandBuffers_.data()) != VK_SUCCESS)
-        throw std::runtime_error("VULKAN ERROR: UNABLE TO ALLOCATE COMMANDBUFFERS!");
-
-    }
 
     VkSurfaceFormatKHR SwapChain::GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
     {
@@ -144,14 +115,14 @@ namespace Epsilon::Vulkan
     void SwapChain::CreateSwapchainHandle(const Device &device, const Surface &surface, GLFWwindow *window)
     {
       SwapChainContext context(device.GetPhysicalHandle(), surface.GetSurfaceHandle());
-      unsigned imageCount = context.capabilities.minImageCount + 1;
+      minImageCount_ = context.capabilities.minImageCount + 1;
       //create a struct for creating a swapchain
       VkSwapchainCreateInfoKHR info{VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR};
 
       auto surfaceFormat = GetSwapChainFormat(context.formats);
       //populate struct data
       info.surface = surface.GetSurfaceHandle();
-      info.minImageCount = imageCount;
+      info.minImageCount = minImageCount_;
       info.imageFormat = surfaceFormat.format;
       info.imageColorSpace = surfaceFormat.colorSpace;
       info.imageExtent = GetSwapExtent(context.capabilities, window);
@@ -187,10 +158,10 @@ namespace Epsilon::Vulkan
         throw InitializationException("Could not create a swap chain!");
 
       //get the swapchain images
-      unsigned int imageSize;
-      vkGetSwapchainImagesKHR(device.GetLogicalHandle(), handle_, &imageSize, nullptr);
-      images_.resize(imageSize);
-      vkGetSwapchainImagesKHR(device.GetLogicalHandle(), handle_, &imageSize, images_.data());
+
+      vkGetSwapchainImagesKHR(device.GetLogicalHandle(), handle_, &imageCount, nullptr);
+      images_.resize(imageCount);
+      vkGetSwapchainImagesKHR(device.GetLogicalHandle(), handle_, &imageCount, images_.data());
 
 
       extent_ = info.imageExtent;
@@ -241,90 +212,6 @@ namespace Epsilon::Vulkan
       }
     }
 
-    void SwapChain::CreateRenderPass()
-    {
-      //setup the color attachemnt for 1 image that will be used for rendering
-      VkAttachmentDescription colorAttachment{};
-      colorAttachment.format = format_;
-
-      //only one sample since multisampling is not enabled
-      colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-
-      //clear all data before rendering
-      colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-
-      //keep data when we are done rendering
-      colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-      //we dont do anything with the stencil buffer, so we dont care about what happens to it
-      colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-      colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-      //we dont care how the layout of the render pass starts off
-      colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-      //we want the renderpass to be used for swap chain purposes
-      colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-      //create a sub pass for actual rendering (we can be a little more complicated once we do more advanced rendering)
-      VkAttachmentReference colorAttachmentRef{};
-
-      //connect the sub pass to the 0th index in the pass
-      colorAttachmentRef.attachment = 0;
-
-      //we want to optimize this subpass as much as possible
-      colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-      //we need to define the subpass that we want to create
-      VkSubpassDescription subpass{};
-
-      //describe that the subpass is used for graphics
-      subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-      //attach the subpass to the description
-      //NOTE: you can add more than one subpass for rendering!!!!!
-      subpass.colorAttachmentCount = 1;
-      subpass.pColorAttachments = &colorAttachmentRef;
-
-      //Create a dependency
-      VkSubpassDependency dependency{};
-
-      //define a subpass as implicit to the render pass
-      dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-
-      //set the dependancy to the only subpass
-      dependency.srcSubpass = 0;
-
-
-      //set when the subpass should wait
-      dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-      dependency.srcAccessMask = 0;
-
-      //set when the subpass should wait when the swap chain is currently getting written
-      dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-      dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-      dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-      //another stupid struct to create the render pass
-      VkRenderPassCreateInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO};
-
-      //only one color attachment
-      renderPassInfo.attachmentCount = 1;
-      renderPassInfo.pAttachments = &colorAttachment;
-
-      //set the subpass for rendering
-      renderPassInfo.pSubpasses = &subpass;
-      renderPassInfo.subpassCount = 1;
-
-      //add the dependency to the renderpass
-      renderPassInfo.pDependencies = &dependency;
-      renderPassInfo.dependencyCount = 1;
-
-      //create the render pass
-      if (vkCreateRenderPass(Device_.GetLogicalHandle(), &renderPassInfo, nullptr, &renderPass_) != VK_SUCCESS)
-        throw InitializationException("VULKAN ERROR: Cannot create the proper render pass!!");
-
-    }
-
     void SwapChain::CreateSemaphores()
     {
       //AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -360,10 +247,16 @@ namespace Epsilon::Vulkan
     {
       CreateSwapchainHandle(Device_, surface_, windowHandle_);
       CreateImageViews(Device_);
-      CreateRenderPass();
+      renderPass_ = new RenderPass(Device_, format_);
+
       CreateFrameBuffers();
-      CreateCommandPool(Device_, surface_);
-      CreateCommandBuffers();
+
+      commandPool_ = new CommandPool(Device_,
+                                     QueueFamilyIndices(Device_.GetPhysicalHandle(), surface_.GetSurfaceHandle())
+                                     .graphicsInd_.value());
+
+      commandBuffers_ = commandPool_->CreateCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, framesPerFlight);
+
       CreateSemaphores();
 
     }
@@ -373,6 +266,7 @@ namespace Epsilon::Vulkan
       //wait until data is not used anymore
       vkDeviceWaitIdle(Device_.GetLogicalHandle());
 
+
       //destroy semaphores
       for (int i = 0; i < framesPerFlight; i++)
       {
@@ -380,26 +274,23 @@ namespace Epsilon::Vulkan
         vkDestroySemaphore(Device_.GetLogicalHandle(), renderFinishedSemaphore_[i], nullptr);
         vkDestroyFence(Device_.GetLogicalHandle(), fences_[i], nullptr);
       }
-      //destroy the command pool
-      vkDestroyCommandPool(Device_.GetLogicalHandle(), commandPool_, nullptr);
 
       //destroy all framebuffers
       for (auto frameBuffer: frameBuffers_)
         vkDestroyFramebuffer(Device_.GetLogicalHandle(), frameBuffer, nullptr);
 
-      //cleanup render pass
-      vkDestroyRenderPass(Device_.GetLogicalHandle(), renderPass_, nullptr);
-
+      delete renderPass_;
       //remove all the views associated with the swapchain
       for (auto imageView: views_)
         vkDestroyImageView(Device_.GetLogicalHandle(), imageView, nullptr);
+      commandBuffers_.clear();
+
+      delete commandPool_;
 
       //destroy the swapchain
       vkDestroySwapchainKHR(Device_.GetLogicalHandle(), handle_, nullptr);
-
       frameBuffers_.clear();
       views_.clear();
-      frameBuffers_.clear();
       fences_.clear();
 
     }
@@ -414,6 +305,7 @@ namespace Epsilon::Vulkan
         //store a location of the necessary semaphore in a sendable format
         VkSemaphore waitSemaphores[] = {imageAvailableSemaphore_[currentFrame_]};
 
+        VkCommandBuffer commandBuffer[] = {commandBuffers_[currentFrame_].GetHandle()};
         //store the stage of the semaphore
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
@@ -426,7 +318,7 @@ namespace Epsilon::Vulkan
 
         //send command buffers
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffers_[currentFrame_];
+        submitInfo.pCommandBuffers = commandBuffer;
 
         //create the done timer in a sendable format
         VkSemaphore signalSemaphore[] = {renderFinishedSemaphore_[currentFrame_]};
@@ -499,33 +391,22 @@ namespace Epsilon::Vulkan
       VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
       cbinfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
+      commandBuffers_[currentFrame_].Reset();
 
-      vkResetCommandBuffer(commandBuffers_[currentFrame_], 0);
       vkAcquireNextImageKHR(Device_.GetLogicalHandle(), handle_, UINT32_MAX, imageAvailableSemaphore_[currentFrame_],
                             nullptr, &imageIndex);
 
 
-      if (vkBeginCommandBuffer(commandBuffers_[currentFrame_], &cbinfo) != VK_SUCCESS)
-        throw std::runtime_error("VULKAN ERROR: FAILED TO INITIALIZE COMMANDBUFFER!!!");
+      //start recording the render pass
+      commandBuffers_[currentFrame_].BeginRecording();
 
-      //start running the render pass
+      //update the renderpass values
+      renderPass_->SetExtent(extent_);
+      renderPass_->SetOffset({0,0});
+      renderPass_->SetFrameBuffer(frameBuffers_[imageIndex]);
+      renderPass_->SetClearColorValue({{0,0,0,1}});
+      renderPass_->StartRendering(commandBuffers_[currentFrame_]);
 
-      //another struct, another cent
-      VkRenderPassBeginInfo renderPassInfo{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
-      renderPassInfo.renderPass = renderPass_;
-      renderPassInfo.framebuffer = frameBuffers_[imageIndex];
-
-      renderPassInfo.renderArea.offset = {0, 0};
-      renderPassInfo.renderArea.extent = extent_;
-
-      //set the clear color for the texture
-      VkClearValue clearColor = {0, 0, 1, 1};
-
-      renderPassInfo.clearValueCount = 1;
-      renderPassInfo.pClearValues = &clearColor;
-
-      //set the render pass
-      vkCmdBeginRenderPass(commandBuffers_[currentFrame_], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
     void SwapChain::RenderShader(vkShader *shader)
@@ -534,8 +415,8 @@ namespace Epsilon::Vulkan
       if (!allowRendering)
         return;
 
-      vkCmdBindPipeline(commandBuffers_[currentFrame_], VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
-      vkCmdDraw(commandBuffers_[currentFrame_], 3, 1, 0, 0);
+      vkCmdBindPipeline(commandBuffers_[currentFrame_].GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, shader->GetPipeline());
+      vkCmdDraw(commandBuffers_[currentFrame_].GetHandle(), 3, 1, 0, 0);
 
     }
 
@@ -545,10 +426,9 @@ namespace Epsilon::Vulkan
       if (!allowRendering)
         return;
 
-      vkCmdEndRenderPass(commandBuffers_[currentFrame_]);
+      renderPass_->EndRendering();
 
-      if (vkEndCommandBuffer(commandBuffers_[currentFrame_]) != VK_SUCCESS)
-        throw std::runtime_error("Failed to record command buffer!!!");
+      commandBuffers_[currentFrame_].EndRecording();
     }
 
     void SwapChain::Refresh()

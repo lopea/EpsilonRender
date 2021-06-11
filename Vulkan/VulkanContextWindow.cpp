@@ -13,6 +13,7 @@
 #include <set>
 #include <algorithm>
 #include "VulkanShader.h"
+#include "../ImGui/ImGuiContext.h"
 
 namespace Epsilon::Vulkan
 {
@@ -47,6 +48,7 @@ namespace Epsilon::Vulkan
     device_(instance_, surface_),
       swapChain_(device_, surface_, GetWindow())
     {
+      ImGuiHelper::CreateForVulkan(GetWindow(), device_, instance_, swapChain_);
     }
 
     void ContextWindow::EndFrame()
@@ -77,8 +79,18 @@ namespace Epsilon::Vulkan
 
     void ContextWindow::StartFrame()
     {
+      ImGui_ImplVulkan_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+
+      ImGui::NewFrame();
+      ImGui::ShowDemoWindow();
+      ImGui::Render();
+      ImDrawData* data = ImGui::GetDrawData();
       //clear the selected frame buffer
       swapChain_.ClearFrame();
+
+      ImGui_ImplVulkan_RenderDrawData(data,swapChain_.GetCurrentCommandBuffer().GetHandle());
+
     }
 
     void ContextWindow::OnResize(unsigned int width, unsigned int height)

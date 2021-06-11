@@ -98,7 +98,7 @@ namespace Epsilon::Vulkan
       //create a command buffer for this operation
       VkCommandBufferAllocateInfo cbInfo {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
       cbInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-      cbInfo.commandPool = chain_.GetCommnandPool();
+      cbInfo.commandPool = chain_.GetCommnandPool().GetHandle();
       cbInfo.commandBufferCount = 1;
 
       //allocate the command buffer
@@ -136,6 +136,6 @@ namespace Epsilon::Vulkan
       vkQueueWaitIdle(device_.GetGraphicsQueue());
 
       //free the command buffer
-      vkFreeCommandBuffers(device_.GetLogicalHandle(), chain_.GetCommnandPool(), 1, &commandBuffer);
+      vkFreeCommandBuffers(device_.GetLogicalHandle(), chain_.GetCommnandPool().GetHandle(), 1, &commandBuffer);
     }
 }

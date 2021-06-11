@@ -8,6 +8,10 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include "VulkanDevice.h"
+#include "VulkanCommandPool.h"
+#include "VulkanRenderPass.h"
+#include "VulkanCommandBuffer.h"
+#include "VulkanDescriptorPool.h"
 
 struct GLFWwindow;
 
@@ -27,9 +31,13 @@ namespace Epsilon::Vulkan
         void FinishFrame();
         void RenderShader(vkShader* shader);
 
-        [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_;}
+        [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_->GetHandle();}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
-        [[nodiscard]] VkCommandPool GetCommnandPool() const { return commandPool_; }
+        [[nodiscard]] CommandPool & GetCommnandPool() { return *commandPool_; }
+        [[nodiscard]] DescriptorPool& GetDescriptorPool() const { return *DescriptorPool_;}
+        [[nodiscard]] uint32_t GetMinImageCount() const { return minImageCount_;}
+        [[nodiscard]] uint32_t GetImageCount() const { return imageCount;}
+        [[nodiscard]] CommandBuffer& GetCurrentCommandBuffer(){ return commandBuffers_[currentFrame_];}
 
         void MarkForRefresh();
     private:
@@ -42,14 +50,15 @@ namespace Epsilon::Vulkan
         std::vector<VkImage> images_;
         std::vector<VkImageView> views_;
         VkExtent2D extent_;
-        VkRenderPass renderPass_;
+        RenderPass* renderPass_;
         std::vector<VkFramebuffer> frameBuffers_;
-        VkCommandPool commandPool_;
-        std::vector<VkCommandBuffer> commandBuffers_;
+        CommandPool* commandPool_;
+        std::vector<CommandBuffer> commandBuffers_;
         std::vector<VkSemaphore> imageAvailableSemaphore_, renderFinishedSemaphore_;
         std::vector<VkFence> fences_;
         std::size_t currentFrame_ = 0;
         const int framesPerFlight = 2;
+
         //store the next image for rendering
         uint32_t imageIndex = 0;
 
@@ -58,6 +67,11 @@ namespace Epsilon::Vulkan
 
         //! check if the swapchain is not valid for rendering (having a screen size of zero or minimized)
         bool allowRendering = true;
+
+        DescriptorPool* DescriptorPool_;
+
+        uint32_t minImageCount_;
+        uint32_t imageCount;
 
         VkPresentModeKHR GetSwapChainPresentMode(const std::vector<VkPresentModeKHR> &availableModes);
 
@@ -70,14 +84,8 @@ namespace Epsilon::Vulkan
 
         void CreateImageViews(const Device& device);
 
-        void CreateRenderPass();
-
-        void CreateCommandPool(const Device &device, const Surface &screen);
 
         void CreateFrameBuffers();
-
-        void CreateCommandBuffers();
-
         void CreateSemaphores();
 
         void Initialize();

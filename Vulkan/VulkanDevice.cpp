@@ -7,7 +7,7 @@
 #include <set>
 #include "VulkanDevice.h"
 #include "VulkanException.h"
-#include "SwapChainContext.h"
+#include "../SwapChainContext.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "VulkanQueueFamilies.h"
@@ -130,10 +130,12 @@ namespace Epsilon::Vulkan
 
     }
 
-    Device::Device(Instance &instance, const Surface &surface)
+    Device::Device(Instance &instance, const Surface &surface) : vkPhysDevice_(nullptr), vkLogicalDevice_(nullptr),
+    presentQueue_(nullptr), graphicsQueue_(nullptr), family(nullptr,nullptr)
     {
       PickPhysicalDevice(instance.GetInstanceHandle(), surface.GetSurfaceHandle());
       CreateLogicalDevice(surface.GetSurfaceHandle());
+      family = QueueFamilyIndices(vkPhysDevice_, surface.GetSurfaceHandle());
     }
 
     bool Device::CheckDeviceValidity(VkPhysicalDevice Device, VkSurfaceKHR Surface)

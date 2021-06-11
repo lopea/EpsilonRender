@@ -2,8 +2,9 @@
 // Created by Javier on 5/27/2021.
 //
 
-#include "Context.h"
-#include "VulkanContextWindow.h"
+#include "App.h"
+#include "Vulkan/VulkanContextWindow.h"
+#include "ImGui/ImGuiContext.h"
 
 
 #include <stdexcept>
@@ -11,8 +12,9 @@
 
 namespace Epsilon
 {
-    Context::Context(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
+    App::App(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
+      ImGuiHelper::Initialize();
       try
       {
         renderer_ = new Vulkan::ContextWindow(width,height);
@@ -22,15 +24,17 @@ namespace Epsilon
       }
     }
 
-    Context::~Context()
+    App::~App()
     {
       //delete the renderer specification
       delete renderer_;
+
+      ImGuiHelper::Shutdown();
       //terminate glfw
       glfwTerminate();
     }
 
-    void Context::Run()
+    void App::Run()
     {
       //run the program until the user wants it to close
       while(!renderer_->WillClose())
@@ -46,7 +50,7 @@ namespace Epsilon
 
     }
 
-    void Context::Update()
+    void App::Update()
     {
 
     }

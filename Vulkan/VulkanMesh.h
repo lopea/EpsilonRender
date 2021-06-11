@@ -6,7 +6,7 @@
 #define EPSILONRENDERER_VULKANMESH_H
 
 
-#include "Mesh.h"
+#include "../Mesh.h"
 #include "VulkanDevice.h"
 #include "VulkanBuffer.h"
 #include "VulkanSwapChain.h"

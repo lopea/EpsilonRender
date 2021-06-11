@@ -5,7 +5,7 @@
 #ifndef EPSILONRENDERER_VULKANMESHHELPER_H
 #define EPSILONRENDERER_VULKANMESHHELPER_H
 #include <vulkan/vulkan.h>
-#include "Mesh.h"
+#include "../Mesh.h"
 #include <array>
 
 namespace Epsilon::Vulkan

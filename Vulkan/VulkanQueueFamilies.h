@@ -7,7 +7,7 @@
 
 #include <vulkan/vulkan.h>
 #include <optional>
-
+#include <vector>
 namespace Epsilon::Vulkan
 {
     //! used to store queues on a physical device
@@ -31,7 +31,8 @@ namespace Epsilon::Vulkan
          */
         explicit QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface) : graphicsInd_(), presentInd_()
         {
-
+          if(!device || !surface)
+            return;
           uint32_t indexCount;
 
           //get the queues for the device

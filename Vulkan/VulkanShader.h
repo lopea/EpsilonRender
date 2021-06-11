@@ -6,7 +6,7 @@
 #define EPSILONRENDERER_VULKANSHADER_H
 
 #include <string>
-#include "Shader.h"
+#include "../Shader.h"
 #include "vulkan/vulkan.h"
 #include "VulkanContextWindow.h"
 

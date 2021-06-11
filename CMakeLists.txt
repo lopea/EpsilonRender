@@ -10,7 +10,53 @@ set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(lib)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer main.cpp Context.cpp Context.h ContextWindow.cpp ContextWindow.h VulkanContextWindow.cpp VulkanContextWindow.h Shader.cpp Shader.h VulkanShader.cpp VulkanShader.h VulkanSwapChain.cpp VulkanSwapChain.h VulkanInstance.cpp VulkanInstance.h VulkanException.h VulkanQueueFamilies.h SwapChainContext.h VulkanDevice.cpp VulkanDevice.h VulkanSurface.cpp VulkanSurface.h Mesh.cpp Mesh.h VulkanMeshHelper.h VulkanMesh.cpp VulkanMesh.h Renderer.cpp Renderer.h VulkanBuffer.cpp VulkanBuffer.h Object.cpp Object.h ObjectManager.cpp ObjectManager.h VulkanMeshHelper.cpp)
+add_executable(EpsilonRenderer
+        main.cpp
+        App.cpp
+        App.h
+        ContextWindow.cpp
+        ContextWindow.h
+        Vulkan/VulkanContextWindow.cpp
+        Vulkan/VulkanContextWindow.h
+        Shader.cpp
+        Shader.h
+        Vulkan/VulkanShader.cpp
+        Vulkan/VulkanShader.h
+        Vulkan/VulkanSwapChain.cpp
+        Vulkan/VulkanSwapChain.h
+        Vulkan/VulkanInstance.cpp
+        Vulkan/VulkanInstance.h
+        Vulkan/VulkanException.h
+        Vulkan/VulkanQueueFamilies.h
+        SwapChainContext.h
+        Vulkan/VulkanDevice.cpp
+        Vulkan/VulkanDevice.h
+        Vulkan/VulkanSurface.cpp
+        Vulkan/VulkanSurface.h
+        Mesh.cpp
+        Mesh.h
+        Vulkan/VulkanMeshHelper.h
+        Vulkan/VulkanMesh.cpp
+        Vulkan/VulkanMesh.h
+        Renderer.cpp
+        Renderer.h
+        Vulkan/VulkanBuffer.cpp
+        Vulkan/VulkanBuffer.h
+        Object.cpp
+        Object.h
+        ObjectManager.cpp
+        ObjectManager.h
+        Vulkan/VulkanMeshHelper.cpp 
+        Vulkan/VulkanRenderPass.cpp
+        Vulkan/VulkanRenderPass.h
+        Vulkan/VulkanCommandBuffer.cpp
+        Vulkan/VulkanCommandBuffer.h
+        Vulkan/VulkanCommandPool.cpp
+        Vulkan/VulkanCommandPool.h
+        ImGui/ImGuiContext.cpp
+        ImGui/ImGuiContext.h
+        Vulkan/VulkanDescriptorPool.cpp
+        Vulkan/VulkanDescriptorPool.h)
 
 #set compiler flags
 if(MSVC)
@@ -20,7 +66,7 @@ else()
     set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "-Wall -Werror -Wextra -pedantic \
     -O -Wno-missing-field-initializers -Wno-maybe-uninitialized -Wno-unused-parameter")
 endif()
-# add access to Vulkan
+# add access to Vulkan/Vulkan
 find_package(Vulkan REQUIRED)
 
 #add preprocessor directive
@@ -30,7 +76,7 @@ set(PREPROCESSOR_DIR GLFW_INCLUDE_VULKAN)
 
 # set platform specific directives
 if(MSVC)
-    set(PREPROCESSOR_DIR ${PREPROCESSOR_DIR} VK_USE_PLATFORM_WIN32_KHR  GLFW_EXPOSE_NATIVE_WIN32)
+    set(PREPROCESSOR_DIR ${PREPROCESSOR_DIR} VK_USE_PLATFORM_WIN32_KHR)
 elseif(UNIX)
     set(PREPROCESSOR_DIR ${PREPROCESSOR_DIR} VK_USE_PLATFORM_XCB_KHR GLFW_EXPOSE_NATIVE_XCB)
 endif()
@@ -40,4 +86,4 @@ endif()
 target_compile_definitions(EpsilonRenderer PRIVATE ${PREPROCESSOR_DIR})
 
 # link the available libraries
-target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp)
+target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp imgui)

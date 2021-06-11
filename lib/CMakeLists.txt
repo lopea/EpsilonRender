@@ -8,13 +8,19 @@ add_subdirectory(glm)
 add_subdirectory(assimp)
 
 #add library to link with imgui
-add_library(imgui INTERFACE
+add_library(imgui INTERFACE)
+target_sources(imgui INTERFACE
         imgui/imgui.cpp
         imgui/imgui_demo.cpp
         imgui/imgui_draw.cpp
         imgui/imgui_widgets.cpp
         imgui/misc/cpp/imgui_stdlib.cpp
         imgui/backends/imgui_impl_glfw.cpp
+        imgui/backends/imgui_impl_vulkan.cpp
         imgui/imgui_tables.cpp)
+
+target_include_directories(imgui INTERFACE imgui ${GLFW_INCLUDE_DIR})
+
+target_link_directories(imgui INTERFACE ${GLFW_LIBRARY})
 
 
