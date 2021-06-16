@@ -4,16 +4,11 @@
 
 #include "VulkanContextWindow.h"
 
-#include <exception>
 #include <stdexcept>
 #include <iostream>
-#include <vector>
-#include <optional>
-#include <GLFW/glfw3native.h>
-#include <set>
 #include <algorithm>
 #include "VulkanShader.h"
-#include "../ImGui/ImGuiContext.h"
+
 
 namespace Epsilon::Vulkan
 {

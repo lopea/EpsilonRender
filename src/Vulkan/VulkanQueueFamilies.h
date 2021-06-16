@@ -28,6 +28,8 @@ namespace Epsilon::Vulkan
          * Get all the queue families present in a physical device
          * @param device if the device contains all the proper families to be considered complete,
          * the function will return a complete family queue. Otherwise, the queue returned will be incomplete
+         * @param surface reference to the screen device needed for graphics operations, which will be used to identify
+         * the graphics queue for the device
          */
         explicit QueueFamilyIndices(VkPhysicalDevice device, VkSurfaceKHR surface) : graphicsInd_(), presentInd_()
         {

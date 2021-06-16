@@ -7,6 +7,9 @@ add_subdirectory(glm)
 #add access to assimp
 add_subdirectory(assimp)
 
+#add documentation
+add_subdirectory(docs)
+
 #add library to link with imgui
 add_library(imgui INTERFACE)
 target_sources(imgui INTERFACE

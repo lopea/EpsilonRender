@@ -30,3 +30,14 @@ $ cmake --target EpsilonRenderer --build <binary directory>
 ```
 
 The program executable will be located at `<binary directory>`.
+
+### Documentation
+Before generating the documentation for this project, you must install Doxygen 1.9.1 or later in a directory visible to CMake (the default directory should do).
+
+To generate the documentation for this project change the CMake target to `Epsilon_Documentation` instead.
+
+```bash
+$ cmake --target Epsilon_Documentation --build <output directory>
+```
+
+The following command will create the doxygen-generated documentation at `<output directory>/docs`

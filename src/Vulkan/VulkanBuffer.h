@@ -21,6 +21,9 @@ namespace Epsilon::Vulkan
         /*!
          * Buffer Constructor
          * Create a new buffer that will be used for vulkan related operations
+         * @param device reference to the device that will use this buffer for vulkan operations
+         * @param chain reference to the swap buffer configuration that contains the main command pool, which is needed
+         *              for proper copy operations.
          * @param size the size of the buffer in bytes
          * @param usage shows how the buffer will be used
          * @param memFlags how the buffer will be allocated
