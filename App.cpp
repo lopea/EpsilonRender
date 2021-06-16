@@ -14,10 +14,11 @@ namespace Epsilon
 {
     App::App(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
-      ImGuiHelper::Initialize();
+      ImGuiEnvironment::Initialize();
       try
       {
         renderer_ = new Vulkan::ContextWindow(width,height);
+        ImGuiEnvironment::LinkContext(renderer_);
       }catch (std::runtime_error& ex)
       {
         std::cerr << ex.what() << std::endl;
@@ -26,10 +27,11 @@ namespace Epsilon
 
     App::~App()
     {
+
+      ImGuiEnvironment::Shutdown();
       //delete the renderer specification
       delete renderer_;
 
-      ImGuiHelper::Shutdown();
       //terminate glfw
       glfwTerminate();
     }
@@ -39,12 +41,16 @@ namespace Epsilon
       //run the program until the user wants it to close
       while(!renderer_->WillClose())
       {
+        ImGuiEnvironment::StartFrame();
+        ImGui::ShowDemoWindow();
+
         //clear the previous frame
         renderer_->StartFrame();
         //run any renderer specific actions
+        ImGuiEnvironment::RenderToContext();
         Update();
         renderer_->EndFrame();
-        //update glfw and any of its events
+
         glfwPollEvents();
       }
 
@@ -52,6 +58,6 @@ namespace Epsilon
 
     void App::Update()
     {
-
+        objManager_.Update();
     }
 }

@@ -19,6 +19,10 @@ namespace Epsilon
 
         void DeleteObject(Object *obj);
 
+        void Update();
+
+        void UpdateImGuiCalls();
+
     private:
         void DeleteMarkedObjects();
 
@@ -41,6 +45,8 @@ namespace Epsilon
       //send the reference to the object
       return objects.back().get();
     }
+
+
 }
 
 #endif //EPSILONRENDERER_OBJECTMANAGER_H

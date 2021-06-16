@@ -72,7 +72,6 @@ namespace Epsilon
         virtual void OnResize(unsigned width, unsigned height)
             {(void)width;(void)height;}
 
-
     protected:
         void SetWindowHandle(GLFWwindow *newWindow);
 

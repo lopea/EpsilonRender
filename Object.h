@@ -14,9 +14,11 @@ namespace Epsilon
     class Object
     {
     public:
-        virtual void Start() = 0;
-
         virtual void Update() = 0;
+
+        virtual void OnImGuiDraw() {};
+
+        virtual void OnRender() {}
 
         virtual ~Object() = default;
 

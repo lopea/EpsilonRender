@@ -22,4 +22,19 @@ namespace Epsilon
         objects.erase(iterator);
       }
     }
+
+    void ObjectManager::Update()
+    {
+      for(auto& object : objects)
+      {
+        object->Update();
+      }
+    }
+
+    void ObjectManager::UpdateImGuiCalls()
+    {
+      //go through all objects and call their uses to imgui
+      for(auto& object : objects)
+        object->OnImGuiDraw();
+    }
 }
