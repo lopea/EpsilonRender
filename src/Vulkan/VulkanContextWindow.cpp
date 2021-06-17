@@ -26,7 +26,7 @@ namespace Epsilon::Vulkan
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
       //create the window
-      GLFWwindow *handle = glfwCreateWindow(width, height, "Epsilon", nullptr, nullptr);
+      GLFWwindow *handle = glfwCreateWindow(width, height, "Epsilon *Vulkan API*", nullptr, nullptr);
 
       return handle;
     }

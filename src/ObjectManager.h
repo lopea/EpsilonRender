@@ -21,8 +21,6 @@ namespace Epsilon
 
         void Update();
 
-        void UpdateImGuiCalls();
-
     private:
         void DeleteMarkedObjects();
 

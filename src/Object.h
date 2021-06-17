@@ -11,12 +11,13 @@
 
 namespace Epsilon
 {
+
     class Object
     {
     public:
-        virtual void Update() = 0;
 
-        virtual void OnImGuiDraw() {};
+        //! Gets called every frame the object is active
+        virtual void Update() = 0;
 
         virtual void OnRender() {}
 
@@ -24,6 +25,7 @@ namespace Epsilon
 
         [[nodiscard]] bool IsDeleted() const {return isDeleted_;}
 
+        //avoid any copying
         Object& operator=(Object&) = delete;
         Object(Object&) = delete;
 

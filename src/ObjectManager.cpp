@@ -31,10 +31,4 @@ namespace Epsilon
       }
     }
 
-    void ObjectManager::UpdateImGuiCalls()
-    {
-      //go through all objects and call their uses to imgui
-      for(auto& object : objects)
-        object->OnImGuiDraw();
-    }
 }

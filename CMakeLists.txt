@@ -25,7 +25,7 @@ set(EPSILON_CORE_FILES
         src/Object.cpp
         src/Object.h
         src/ObjectManager.cpp
-        src/ObjectManager.h)
+        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h)
 
 set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanContextWindow.cpp
@@ -58,7 +58,7 @@ set(EPSILON_VULKAN_FILES
         src/ImGui/ImGuiContext.cpp
         src/ImGui/ImGuiContext.h
         src/Vulkan/VulkanDescriptorPool.cpp
-        src/Vulkan/VulkanDescriptorPool.h)
+        src/Vulkan/VulkanDescriptorPool.h src/Transform.cpp src/Transform.h)
 
 # add all necessary files for the executable project
 add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES})
@@ -66,10 +66,11 @@ add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES})
 #set compiler flags
 if(MSVC)
     #windows compiler flags
-    set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "/W4 /WX")
+    set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "/W4 /WX /arch:AVX2 /Od")
 else()
+    # linux compile flags
     set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "-Wall -Werror -Wextra -pedantic \
-    -O -Wno-missing-field-initializers -Wno-maybe-uninitialized -Wno-unused-parameter")
+    -Wno-missing-field-initializers -Wno-maybe-uninitialized -Wno-unused-parameter")
 endif()
 # add access to Vulkan/Vulkan
 find_package(Vulkan REQUIRED)
