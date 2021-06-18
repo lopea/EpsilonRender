@@ -9,54 +9,59 @@ set(CMAKE_CXX_STANDARD 20)
 # include the library directory
 add_subdirectory(lib)
 
+
+set(EPSILON_CORE_FILES
+        src/main.cpp
+        src/App.cpp
+        src/App.h
+        src/ContextWindow.cpp
+        src/ContextWindow.h
+        src/Renderer.cpp
+        src/Renderer.h
+        src/Mesh.cpp
+        src/Mesh.h
+        src/Shader.cpp
+        src/Shader.h
+        src/Object.cpp
+        src/Object.h
+        src/ObjectManager.cpp
+        src/ObjectManager.h)
+
+set(EPSILON_VULKAN_FILES
+        src/Vulkan/VulkanContextWindow.cpp
+        src/Vulkan/VulkanContextWindow.h
+        src/Vulkan/VulkanShader.cpp
+        src/Vulkan/VulkanShader.h
+        src/Vulkan/VulkanSwapChain.cpp
+        src/Vulkan/VulkanSwapChain.h
+        src/Vulkan/VulkanInstance.cpp
+        src/Vulkan/VulkanInstance.h
+        src/Vulkan/VulkanException.h
+        src/Vulkan/VulkanQueueFamilies.h
+        src/SwapChainContext.h
+        src/Vulkan/VulkanDevice.cpp
+        src/Vulkan/VulkanDevice.h
+        src/Vulkan/VulkanSurface.cpp
+        src/Vulkan/VulkanSurface.h
+        src/Vulkan/VulkanMeshHelper.h
+        src/Vulkan/VulkanMesh.cpp
+        src/Vulkan/VulkanMesh.h
+        src/Vulkan/VulkanBuffer.cpp
+        src/Vulkan/VulkanBuffer.h
+        src/Vulkan/VulkanMeshHelper.cpp
+        src/Vulkan/VulkanRenderPass.cpp
+        src/Vulkan/VulkanRenderPass.h
+        src/Vulkan/VulkanCommandBuffer.cpp
+        src/Vulkan/VulkanCommandBuffer.h
+        src/Vulkan/VulkanCommandPool.cpp
+        src/Vulkan/VulkanCommandPool.h
+        src/ImGui/ImGuiContext.cpp
+        src/ImGui/ImGuiContext.h
+        src/Vulkan/VulkanDescriptorPool.cpp
+        src/Vulkan/VulkanDescriptorPool.h)
+
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer
-       src/main.cpp
-       src/App.cpp
-       src/App.h
-       src/ContextWindow.cpp
-       src/ContextWindow.h
-       src/Vulkan/VulkanContextWindow.cpp
-       src/Vulkan/VulkanContextWindow.h
-       src/Shader.cpp
-       src/Shader.h
-       src/Vulkan/VulkanShader.cpp
-       src/Vulkan/VulkanShader.h
-       src/Vulkan/VulkanSwapChain.cpp
-       src/Vulkan/VulkanSwapChain.h
-       src/Vulkan/VulkanInstance.cpp
-       src/Vulkan/VulkanInstance.h
-       src/Vulkan/VulkanException.h
-       src/Vulkan/VulkanQueueFamilies.h
-       src/SwapChainContext.h
-       src/Vulkan/VulkanDevice.cpp
-       src/Vulkan/VulkanDevice.h
-       src/Vulkan/VulkanSurface.cpp
-       src/Vulkan/VulkanSurface.h
-       src/Mesh.cpp
-       src/Mesh.h
-       src/Vulkan/VulkanMeshHelper.h
-       src/Vulkan/VulkanMesh.cpp
-       src/Vulkan/VulkanMesh.h
-       src/Renderer.cpp
-       src/Renderer.h
-       src/Vulkan/VulkanBuffer.cpp
-       src/Vulkan/VulkanBuffer.h
-       src/Object.cpp
-       src/Object.h
-       src/ObjectManager.cpp
-       src/ObjectManager.h
-       src/Vulkan/VulkanMeshHelper.cpp
-       src/Vulkan/VulkanRenderPass.cpp
-       src/Vulkan/VulkanRenderPass.h
-       src/Vulkan/VulkanCommandBuffer.cpp
-       src/Vulkan/VulkanCommandBuffer.h
-       src/Vulkan/VulkanCommandPool.cpp
-       src/Vulkan/VulkanCommandPool.h
-       src/ImGui/ImGuiContext.cpp
-       src/ImGui/ImGuiContext.h
-       src/Vulkan/VulkanDescriptorPool.cpp
-       src/Vulkan/VulkanDescriptorPool.h)
+add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES})
 
 #set compiler flags
 if(MSVC)
