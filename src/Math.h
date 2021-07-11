@@ -7,7 +7,7 @@
 
 //reduce warnings only for windows
 
-#ifdef _MSC_VER
+
 
 //check if SIMD operations are available
 
@@ -23,14 +23,19 @@
 
 #endif
 
-
-
+//remove warnings for glm on windows
+#ifdef _WIN32
 #pragma warning(push, 2)
+#endif
+
+//include glm and any other math related libraries
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#pragma warning(pop)
 
+#ifdef _WIN32
+#pragma warning(pop)
 #endif
+
 
 #endif //EPSILONRENDERER_MATH_H

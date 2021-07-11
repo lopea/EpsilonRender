@@ -14,8 +14,8 @@ namespace Epsilon
 {
     enum class SpecificationType
     {
-        Vulkan,
-        OpenGL
+        Vulkan = 0,
+        OpenGL = 1
     };
 
 //! class that is the blueprint for renderers based on the render specification (GL, Vulkan, DirectX)

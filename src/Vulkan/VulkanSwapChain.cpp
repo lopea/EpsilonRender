@@ -99,14 +99,14 @@ namespace Epsilon::Vulkan
 
     VkSurfaceFormatKHR SwapChain::GetSwapChainFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats)
     {
-//      //go through all the available formats
-//      for (const VkSurfaceFormatKHR &format : availableFormats)
-//      {
-//        //if the format is what we want, sent it
-//        if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-//          return format;
-//
-//      }
+      //go through all the available formats
+      for (const VkSurfaceFormatKHR &format : availableFormats)
+      {
+        //if the format is what we want, sent it
+        if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+          return format;
+
+      }
 
       //return something at this point
       return availableFormats[0];
@@ -387,9 +387,6 @@ namespace Epsilon::Vulkan
       //dont do anything if the swapchain cant render
       if (!allowRendering)
         return;
-      //if i had a cent for every struct i've made in this project, i would have enough to buy a gun so i can end my misery
-      VkCommandBufferBeginInfo cbinfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-      cbinfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
       commandBuffers_[currentFrame_].Reset();
 

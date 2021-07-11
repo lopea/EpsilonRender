@@ -5,6 +5,7 @@
 #include "App.h"
 #include "Vulkan/VulkanContextWindow.h"
 #include "ImGui/ImGuiContext.h"
+#include "OpenGL/OpenGLContextWindow.h"
 
 
 #include <stdexcept>
@@ -12,12 +13,13 @@
 
 namespace Epsilon
 {
+    SpecificationType switchTo_;
     App::App(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
       ImGuiEnvironment::Initialize();
       try
       {
-        renderer_ = new Vulkan::ContextWindow(width,height);
+        renderer_ = new OpenGL::ContextWindow(width,height);
         ImGuiEnvironment::LinkContext(renderer_);
       }catch (std::runtime_error& ex)
       {

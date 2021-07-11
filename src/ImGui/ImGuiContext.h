@@ -10,6 +10,7 @@ struct GLFWwindow;
 #include <imgui.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include "../Vulkan/VulkanCommandPool.h"
 #include "../Vulkan/VulkanSwapChain.h"
 #include <functional>
@@ -42,7 +43,7 @@ namespace Epsilon
 
         static void CreateForVulkan(GLFWwindow *window, Vulkan::Device &device, Vulkan::Instance &instance,
                                     Vulkan::SwapChain &swapchain);
-
+        static void CreateForOpenGL(GLFWwindow* window);
 
         static inline std::function<void()> OnShutdown, OnStartFrame;
         static inline std::function<void(ImDrawData*)> OnDraw;

@@ -28,8 +28,8 @@ namespace Epsilon::Vulkan
       VkDescriptorPoolCreateInfo pool_info = {};
       pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
       pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-      pool_info.maxSets = 1000 * _countof(pool_sizes);
-      pool_info.poolSizeCount = (uint32_t)_countof(pool_sizes);
+      pool_info.maxSets = 1000 * std::size(pool_sizes);
+      pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
       pool_info.pPoolSizes = pool_sizes;
       if(vkCreateDescriptorPool(device.GetLogicalHandle(), &pool_info, nullptr, &handle_) != VK_SUCCESS)
         throw InitializationException("Cannot create description pool!");

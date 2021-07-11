@@ -34,7 +34,7 @@ namespace Epsilon
         throw std::runtime_error("ImGui Error: Unable to shutdown properly!!!");
 
       //delete context if necessary
-      if(context)
+      if (context)
         UnlinkContext();
 
       //call the imgui shutdown
@@ -98,7 +98,8 @@ namespace Epsilon
               Vulkan::ContextWindow *VulkanWindow = dynamic_cast<Vulkan::ContextWindow *> (context);
 
               //draw all imgui data to the vulkan command buffer
-              ImGui_ImplVulkan_RenderDrawData(data, VulkanWindow->GetVulkanSwapChain().GetCurrentCommandBuffer().GetHandle());
+              ImGui_ImplVulkan_RenderDrawData(data,
+                                              VulkanWindow->GetVulkanSwapChain().GetCurrentCommandBuffer().GetHandle());
           };
       //set shutdown function
       OnShutdown =
@@ -113,6 +114,45 @@ namespace Epsilon
 
 
     }
+
+    void ImGuiEnvironment::CreateForOpenGL(GLFWwindow *window)
+    {
+      //initialize for GLFW
+      ImGui_ImplGlfw_InitForOpenGL(window, true);
+
+      //Connect imgui with the glfw context
+      ImGui_ImplOpenGL3_Init("#version 460");
+
+      //set the new frame function
+      OnStartFrame =
+          []()
+          {
+
+              //start a new frame for opengl
+              ImGui_ImplOpenGL3_NewFrame();
+              //start a new frame for glfw
+              ImGui_ImplGlfw_NewFrame();
+
+
+          };
+
+      //set the on draw function
+      OnDraw =
+          [](ImDrawData *data)
+          {
+              //start drawing data for opengl
+              ImGui_ImplOpenGL3_RenderDrawData(data);
+          };
+
+      //set the shutdown function
+      OnShutdown =
+          []()
+          {
+              //Destroy any GL context with imgui
+              ImGui_ImplOpenGL3_Shutdown();
+          };
+    }
+
 
     void ImGuiEnvironment::LinkContext(ContextWindow *window)
     {
@@ -144,6 +184,7 @@ namespace Epsilon
         }
           break;
         case SpecificationType::OpenGL:
+          CreateForOpenGL(window->GetWindow());
           break;
       }
       context = window;
@@ -193,4 +234,6 @@ namespace Epsilon
         OnDraw(drawData);
       }
     }
+
+
 }

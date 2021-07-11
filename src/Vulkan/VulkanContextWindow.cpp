@@ -28,6 +28,8 @@ namespace Epsilon::Vulkan
       //create the window
       GLFWwindow *handle = glfwCreateWindow(width, height, "Epsilon *Vulkan API*", nullptr, nullptr);
 
+      glfwMakeContextCurrent(handle);
+
       return handle;
     }
 
@@ -38,9 +40,9 @@ namespace Epsilon::Vulkan
 
     ContextWindow::ContextWindow(unsigned width, unsigned height)
     : Epsilon::ContextWindow(width, height, CreateHandleWindow(width, height)),
-    instance_(),
-    surface_(GetWindow(), instance_),
-    device_(instance_, surface_),
+      instance_(),
+      surface_(GetWindow(), instance_),
+      device_(instance_, surface_),
       swapChain_(device_, surface_, GetWindow())
     {
 
