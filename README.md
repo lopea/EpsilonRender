@@ -1,5 +1,5 @@
 # Epsilon Renderer
-## A tiny little vulkan renderer.
+## A tiny little vulkan/OpenGL renderer.
 ### Setup
 #### Prerequisites
 - Windows or Linux (Mac untested)
