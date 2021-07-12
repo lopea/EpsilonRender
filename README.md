@@ -1,10 +1,10 @@
 # Epsilon Renderer
-## A tiny little vulkan renderer.
+## A tiny little vulkan/OpenGL renderer.
 ### Setup
 #### Prerequisites
 - Windows or Linux (Mac untested)
 - Cmake (3.19 minimum)
-- Vulkan 1.2 API 
+- Vulkan 1.2 API or OpenGL 4.6 
 - MSVC C++ 2019/GCC++/Clang 
 
 #### Git Submodules
