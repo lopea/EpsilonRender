@@ -29,8 +29,6 @@ namespace Epsilon
         Object& operator=(Object&) = delete;
         Object(Object&) = delete;
 
-    protected:
-        Renderer rend{};
     private:
         std::list<std::unique_ptr<Object>>::iterator ref;
         bool isDeleted_ = false;

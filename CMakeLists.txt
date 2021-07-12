@@ -25,7 +25,7 @@ set(EPSILON_CORE_FILES
         src/Object.cpp
         src/Object.h
         src/ObjectManager.cpp
-        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h)
+        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h src/Epsilon.h)
 
 set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanContextWindow.cpp

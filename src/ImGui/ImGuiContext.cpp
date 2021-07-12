@@ -186,6 +186,8 @@ namespace Epsilon
         case SpecificationType::OpenGL:
           CreateForOpenGL(window->GetWindow());
           break;
+        default:
+          break;
       }
       context = window;
     }

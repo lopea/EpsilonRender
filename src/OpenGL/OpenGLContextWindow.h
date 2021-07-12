@@ -23,8 +23,6 @@ namespace Epsilon::OpenGL
 
 
     };
-
-
 }
 
 

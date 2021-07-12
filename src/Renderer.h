@@ -12,9 +12,21 @@ namespace Epsilon
 {
     class Renderer
     {
-      public:
-        Shader shader;
-        Mesh mesh;
+    public:
+        explicit Renderer(SpecificationType type);
+
+        ~Renderer();
+
+        SpecificationType GetSpecificationType() const { return type_;}
+
+        ContextWindow* InitializeNewWindow(unsigned width, unsigned height);
+
+        bool IsEmpty() const { return windows_.empty();}
+
+    private:
+        std::vector<ContextWindow*> windows_;
+        SpecificationType type_;
+
     };
 }
 

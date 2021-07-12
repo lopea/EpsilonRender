@@ -20,8 +20,6 @@ namespace Epsilon::OpenGL
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 
-
-
       //initialize window for gl
       GLFWwindow* newWindow;
 
@@ -49,6 +47,7 @@ namespace Epsilon::OpenGL
       glViewport(0,0, width, height);
       glScissor(0,0, width, height);
     }
+
     void ContextWindow::StartFrame()
     {
       //set background color
@@ -62,8 +61,5 @@ namespace Epsilon::OpenGL
       glfwSwapBuffers(GetWindow());
 
     }
-
-
-
 
 }

@@ -7,16 +7,11 @@
 
 #include <string>
 #include <GLFW/glfw3.h>
-
+#include "Epsilon.h"
 struct GLFWwindow;
 
 namespace Epsilon
 {
-    enum class SpecificationType
-    {
-        Vulkan = 0,
-        OpenGL = 1
-    };
 
 //! class that is the blueprint for renderers based on the render specification (GL, Vulkan, DirectX)
     class ContextWindow

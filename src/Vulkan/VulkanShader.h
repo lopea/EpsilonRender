@@ -26,8 +26,6 @@ namespace Epsilon::Vulkan
         ~vkShader();
 
     private:
-
-
         VkPipelineLayout layout_;
         VkPipeline pipeline_;
         VkDevice logicalDevice_;

@@ -19,7 +19,7 @@ namespace Epsilon
       ImGuiEnvironment::Initialize();
       try
       {
-        renderer_ = new OpenGL::ContextWindow(width,height);
+        renderer_ = new Vulkan::ContextWindow(width,height);
         ImGuiEnvironment::LinkContext(renderer_);
       }catch (std::runtime_error& ex)
       {
