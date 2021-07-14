@@ -6,6 +6,7 @@
 #include "Vulkan/VulkanContextWindow.h"
 #include "ImGui/ImGuiContext.h"
 #include "OpenGL/OpenGLContextWindow.h"
+#include "Vulkan/VulkanRenderSystem.h"
 
 
 #include <stdexcept>
@@ -19,8 +20,14 @@ namespace Epsilon
       ImGuiEnvironment::Initialize();
       try
       {
-        renderer_ = new Vulkan::ContextWindow(width,height);
-        ImGuiEnvironment::LinkContext(renderer_);
+        //create a new system for rendering vulkan
+        renderer_ = new Vulkan::RenderSystem();
+
+        renderer_->PushBackNewWindow(width,height);
+
+        ImGuiEnvironment::LinkSystem(renderer_);
+
+
       }catch (std::runtime_error& ex)
       {
         std::cerr << ex.what() << std::endl;
@@ -40,18 +47,19 @@ namespace Epsilon
 
     void App::Run()
     {
+      ContextWindow* window = renderer_->GetWindow(0);
       //run the program until the user wants it to close
-      while(!renderer_->WillClose())
+      while(!window->WillClose())
       {
         ImGuiEnvironment::StartFrame();
         ImGui::ShowDemoWindow();
 
         //clear the previous frame
-        renderer_->StartFrame();
+        window->StartFrame();
         //run any renderer specific actions
         ImGuiEnvironment::RenderToContext();
         Update();
-        renderer_->EndFrame();
+        window->EndFrame();
 
         glfwPollEvents();
       }

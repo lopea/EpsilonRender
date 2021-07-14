@@ -13,6 +13,7 @@ struct GLFWwindow;
 #include <backends/imgui_impl_opengl3.h>
 #include "../Vulkan/VulkanCommandPool.h"
 #include "../Vulkan/VulkanSwapChain.h"
+#include "../RenderSystem.h"
 #include <functional>
 
 namespace Epsilon
@@ -26,10 +27,10 @@ namespace Epsilon
         /*!
          * Set a window as the main window for Imgui. If a window is already linked, then the previous window is unlinked
          * and the new window will be set as the new context window
-         * @param window The window to connect for ImGui related rendering systems
+         * @param system The window to connect for ImGui related rendering systems
          */
-        static void LinkContext(ContextWindow* window);
-        static void UnlinkContext();
+        static void LinkSystem(Epsilon::RenderSystem *system, unsigned windowIndex = 0);
+        static void UnlinkSystem();
 
 
         static void StartFrame();
@@ -39,14 +40,15 @@ namespace Epsilon
 
     private:
 
-        static inline ContextWindow* context = nullptr;
+        static inline RenderSystem* context = nullptr;
 
         static void CreateForVulkan(GLFWwindow *window, Vulkan::Device &device, Vulkan::Instance &instance,
-                                    Vulkan::SwapChain &swapchain);
+        Vulkan::CommandPool &pool, Vulkan::SwapChain &swapChain);
         static void CreateForOpenGL(GLFWwindow* window);
 
         static inline std::function<void()> OnShutdown, OnStartFrame;
         static inline std::function<void(ImDrawData*)> OnDraw;
+        static inline unsigned windowIndex_;
     };
 
 }

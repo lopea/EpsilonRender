@@ -25,6 +25,7 @@ namespace Epsilon::Vulkan
       //create command buffer
       if(vkAllocateCommandBuffers(pool_.GetDevice().GetLogicalHandle(), &info, &handle_) != VK_SUCCESS)
         throw InitializationException("Unable to create Command Buffer!");
+
     }
 
     void CommandBuffer::BeginRecording(VkCommandBufferUsageFlags recordingFlags)
@@ -52,9 +53,7 @@ namespace Epsilon::Vulkan
     }
 
     CommandBuffer::CommandBuffer(VkCommandBuffer handle, CommandPool &pool) : handle_(handle), pool_(pool)
-    {
-
-    }
+    {}
 
     void CommandBuffer::SubmitCommands()
     {
@@ -68,6 +67,18 @@ namespace Epsilon::Vulkan
 
       vkQueueSubmit(device_.GetGraphicsQueue(), 1, &info, nullptr);
       vkQueueWaitIdle(device_.GetGraphicsQueue());
+    }
+
+    void CommandBuffer::Free()
+    {
+      //get the device to free the buffer
+      Device& device_ = pool_.GetDevice();
+
+      //free the command buffer
+      vkFreeCommandBuffers(device_.GetLogicalHandle(),pool_.GetHandle(), 1, &handle_);
+
+      //clear the handle to avoid any issues
+      handle_ = nullptr;
     }
 
 }

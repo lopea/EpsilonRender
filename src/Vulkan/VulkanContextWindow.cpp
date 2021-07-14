@@ -38,11 +38,10 @@ namespace Epsilon::Vulkan
       return SpecificationType::Vulkan;
     }
 
-    ContextWindow::ContextWindow(unsigned width, unsigned height)
+    ContextWindow::ContextWindow(unsigned width, unsigned height, Instance& instance)
     : Epsilon::ContextWindow(width, height, CreateHandleWindow(width, height)),
-      instance_(),
-      surface_(GetWindow(), instance_),
-      device_(instance_, surface_),
+      surface_(GetWindow(), instance),
+      device_(instance, surface_),
       swapChain_(device_, surface_, GetWindow())
     {
 

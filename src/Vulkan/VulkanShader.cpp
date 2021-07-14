@@ -28,7 +28,6 @@ namespace Epsilon::Vulkan
                        Vulkan::SwapChain& swapChain) : pipeline_(nullptr),
                                                                         logicalDevice_(swapChain.GetDevice())
     {
-
       std::ifstream vertShader(vertFileLocation, std::ios::binary), fragShader(fragFileLocation, std::ios::binary);
 
       //check if files are valuable
@@ -52,17 +51,15 @@ namespace Epsilon::Vulkan
       VkPipelineShaderStageCreateInfo vertShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
       vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
       vertShaderStageInfo.module = vertexModule;
-      vertShaderStageInfo.pName = "main";
+      vertShaderStageInfo.pName = "VertMain";
 
       VkPipelineShaderStageCreateInfo fragShaderStageInfo{VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
       fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
       fragShaderStageInfo.module = fragmentModule;
-      fragShaderStageInfo.pName = "main";
-
+      fragShaderStageInfo.pName = "FragMain";
 
       VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
-      VkExtent2D vkscExtent = swapChain.GetExtent();
       ////////////////////////////////////////////////////
       /// Vertex Input Setup
       ////////////////////////////////////////////////////
@@ -95,41 +92,16 @@ namespace Epsilon::Vulkan
       ////////////////////////////////////////////////////
       /// Viewport Setup
       ////////////////////////////////////////////////////
-      //store the viewport of the device
-      VkViewport viewport{};
 
-      //populate variables...
+      //create a dynamic state
+      VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
 
-      //set the position of the viewport
-      viewport.x = 0;
-      viewport.y = 0;
+      //we want to keep the viewport and the scissor for this shader dynamic so that it can be changed without recreating the pipeline
+      VkDynamicState DynamicStates[] { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
-      //set the dimensions of the viewport
-      viewport.width = static_cast<float>(vkscExtent.width);
-      viewport.height = static_cast<float>(vkscExtent.height);
-
-      ///set the depth values of the viewport
-      viewport.minDepth = 0;
-      viewport.maxDepth = 1;
-
-      //setup scissor values
-      VkRect2D Scissors{};
-
-      //set the offset of the scissor
-      Scissors.offset = {0, 0};
-
-      //set the dimensions of the scissors
-      Scissors.extent = vkscExtent;
-
-      //Create the struct to create a viewport state
-      VkPipelineViewportStateCreateInfo viewportInfo{VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO};
-
-      //set the location for the new viewport and the scissors
-      viewportInfo.pViewports = &viewport;
-      viewportInfo.pScissors = &Scissors;
-
-      //set the count of the viewports and scissors
-      viewportInfo.scissorCount = viewportInfo.viewportCount = 1;
+      //set the states to the info struct
+      dynamicStateCreateInfo.dynamicStateCount = std::size(DynamicStates);
+      dynamicStateCreateInfo.pDynamicStates = DynamicStates;
 
       ////////////////////////////////////////////////////
       /// Rasterizer Setup
@@ -179,7 +151,6 @@ namespace Epsilon::Vulkan
 
       //create another handle for the color state
       VkPipelineColorBlendStateCreateInfo colorBlend{VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
-
       //disable any blending for now
       colorBlend.logicOpEnable = VK_FALSE;
 
@@ -203,12 +174,12 @@ namespace Epsilon::Vulkan
       graphicsPipelineInfo.subpass = 0;
       graphicsPipelineInfo.pVertexInputState = &vertexInfo;
       graphicsPipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
-      graphicsPipelineInfo.pViewportState = &viewportInfo;
       graphicsPipelineInfo.pMultisampleState = &multisampling;
       graphicsPipelineInfo.pColorBlendState = &colorBlend;
       graphicsPipelineInfo.layout = layout_;
       graphicsPipelineInfo.pRasterizationState = &rasterizer;
       graphicsPipelineInfo.renderPass =swapChain.GetRenderPass(); //context.GetWindowRenderPass();
+      graphicsPipelineInfo.pDynamicState = &dynamicStateCreateInfo;
 
       if (vkCreateGraphicsPipelines(logicalDevice_, nullptr, 1, &graphicsPipelineInfo, nullptr, &pipeline_) !=
           VK_SUCCESS)

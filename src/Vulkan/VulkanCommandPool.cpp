@@ -58,10 +58,10 @@ namespace Epsilon::Vulkan
         throw InitializationException("Unable to create Command Pool!");
     }
 
-    CommandPool::CommandPool(Device &device, uint32_t queueFamilyIndex) : handle_(nullptr), device_(device)
+    CommandPool::CommandPool(Device &device) : handle_(nullptr), device_(device)
     {
       VkCommandPoolCreateInfo info{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
-      info.queueFamilyIndex = queueFamilyIndex;
+      info.queueFamilyIndex = device.GetGraphicsIndices();
       info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
       if(vkCreateCommandPool(device.GetLogicalHandle(), &info, nullptr, &handle_) != VK_SUCCESS)
         throw InitializationException("Unable to create Command Pool!");

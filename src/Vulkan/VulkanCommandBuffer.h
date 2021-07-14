@@ -24,7 +24,9 @@ namespace Epsilon::Vulkan
         void SubmitCommands();
 
         [[nodiscard]] VkCommandBuffer GetHandle() const { return handle_;}
+        [[nodiscard]] const VkCommandBuffer* GetRawHandle() const { return &handle_;}
         void Reset(VkCommandBufferResetFlags flags = 0);
+        void Free();
     private:
         VkCommandBuffer handle_;
         CommandPool& pool_;

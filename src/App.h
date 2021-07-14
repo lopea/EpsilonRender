@@ -27,7 +27,7 @@ namespace Epsilon
         void Update();
 
         GLFWwindow *handle_;
-        ContextWindow* renderer_;
+        RenderSystem* renderer_;
         ObjectManager objManager_;
     };
 }

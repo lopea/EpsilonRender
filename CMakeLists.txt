@@ -16,8 +16,8 @@ set(EPSILON_CORE_FILES
         src/App.h
         src/ContextWindow.cpp
         src/ContextWindow.h
-        src/Renderer.cpp
-        src/Renderer.h
+        src/RenderSystem.cpp
+        src/RenderSystem.h
         src/Mesh.cpp
         src/Mesh.h
         src/Shader.cpp
@@ -25,7 +25,7 @@ set(EPSILON_CORE_FILES
         src/Object.cpp
         src/Object.h
         src/ObjectManager.cpp
-        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h src/Epsilon.h)
+        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h src/Epsilon.h src/OpenGL/glShader.cpp src/OpenGL/glShader.h)
 
 set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanContextWindow.cpp
@@ -58,7 +58,7 @@ set(EPSILON_VULKAN_FILES
         src/ImGui/ImGuiContext.cpp
         src/ImGui/ImGuiContext.h
         src/Vulkan/VulkanDescriptorPool.cpp
-        src/Vulkan/VulkanDescriptorPool.h src/Transform.cpp src/Transform.h)
+        src/Vulkan/VulkanDescriptorPool.h src/Transform.cpp src/Transform.h src/Vulkan/VulkanRenderSystem.cpp src/Vulkan/VulkanRenderSystem.h)
 
 # add all necessary files for the executable project
 add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} src/OpenGL/OpenGLContextWindow.cpp src/OpenGL/OpenGLContextWindow.h src/OpenGL/OpenGLException.h)

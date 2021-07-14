@@ -118,6 +118,19 @@ namespace Epsilon::Vulkan
       //start recording the render pass
       vkCmdBeginRenderPass(commandBuffer.GetHandle(),&info_, VK_SUBPASS_CONTENTS_INLINE);
       buffer_ = &commandBuffer;
+
+      //update the size of the pipelines
+
+      VkViewport viewport{};
+      viewport.width = static_cast<float>(info_.renderArea.extent.width);
+      viewport.height = static_cast<float>(info_.renderArea.extent.height);
+      viewport.minDepth = 0;
+      viewport.maxDepth = 1;
+
+      vkCmdSetViewport(commandBuffer.GetHandle(), 0, 1, &viewport);
+
+      vkCmdSetScissor(commandBuffer.GetHandle(), 0, 1, &info_.renderArea);
+
     }
 
     RenderPass::RenderPass(Device &device, const VkRenderPassCreateInfo &info) : handle_(nullptr), deviceHandle_(device)

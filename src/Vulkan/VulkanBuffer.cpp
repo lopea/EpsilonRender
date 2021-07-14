@@ -10,8 +10,9 @@
 
 namespace Epsilon::Vulkan
 {
-    Buffer::Buffer(Device& device, SwapChain& chain, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags)
-    : device_(device), chain_(chain), handle_(nullptr), memoryHandle_(nullptr), size_(size), usage_(usage), memFlags_(memFlags)
+    Buffer::Buffer(Device &device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags,
+                   CommandPool &pool)
+    : device_(device), commandPool_(pool), handle_(nullptr), memoryHandle_(nullptr), size_(size), usage_(usage), memFlags_(memFlags)
     {
       //start setting up vertex initialization
       VkBufferCreateInfo info {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -94,48 +95,38 @@ namespace Epsilon::Vulkan
 
     void Buffer::CopyBuffer(const Buffer &other)
     {
-      (void) other;
-      //create a command buffer for this operation
-      VkCommandBufferAllocateInfo cbInfo {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-      cbInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-      cbInfo.commandPool = chain_.GetCommnandPool().GetHandle();
-      cbInfo.commandBufferCount = 1;
+      //create a command buffer for the copying process
+      CommandBuffer copyCommand = commandPool_.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-      //allocate the command buffer
-      VkCommandBuffer commandBuffer;
-      vkAllocateCommandBuffers(device_.GetLogicalHandle(), &cbInfo, &commandBuffer);
-
-      //start writing to the buffer
-      VkCommandBufferBeginInfo beginInfo{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-      beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-      //start writing to the command buffer
-      vkBeginCommandBuffer(commandBuffer, &beginInfo);
+      //start the recording process
+      copyCommand.BeginRecording(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
       //create a info struct for coping buffers
       VkBufferCopy copyInfo {};
-#ifdef _MSC_VER
+#ifdef _WIN32
       copyInfo.size = min(size_, other.size_);
 #else
       copyInfo.size = std::min(size_, other.size_);
 #endif
-
       //start copying the buffer
-      vkCmdCopyBuffer(commandBuffer, other.handle_, handle_, 1, &copyInfo);
+      vkCmdCopyBuffer(copyCommand.GetHandle(), other.handle_, handle_, 1, &copyInfo);
 
-      //stop writing to the command buffer
-      vkEndCommandBuffer(commandBuffer);
+      //stop recording
+      copyCommand.EndRecording();
+
 
       //submit the command for execution
       VkSubmitInfo submitInfo{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+
       submitInfo.commandBufferCount = 1;
-      submitInfo.pCommandBuffers = &commandBuffer;
+
+      submitInfo.pCommandBuffers = copyCommand.GetRawHandle();
 
       //start copy
       vkQueueSubmit(device_.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
       vkQueueWaitIdle(device_.GetGraphicsQueue());
 
-      //free the command buffer
-      vkFreeCommandBuffers(device_.GetLogicalHandle(), chain_.GetCommnandPool().GetHandle(), 1, &commandBuffer);
+      //remove any memory associated with the command buffer
+      copyCommand.Free();
     }
 }

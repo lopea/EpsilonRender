@@ -6,6 +6,7 @@
 #define EPSILONRENDERER_VULKANBUFFER_H
 
 #include <vulkan/vulkan.h>
+#include "VulkanCommandPool.h"
 
 namespace Epsilon::Vulkan
 {
@@ -28,7 +29,8 @@ namespace Epsilon::Vulkan
          * @param usage shows how the buffer will be used
          * @param memFlags how the buffer will be allocated
          */
-        Buffer(Device& device, SwapChain& chain, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags);
+        Buffer(Device &device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memFlags,
+               CommandPool &pool);
 
         /*!
          * Add data from CPU memory and add it Buffer
@@ -67,8 +69,8 @@ namespace Epsilon::Vulkan
         //! store reference to the device that handles all vulkan operations
         Device& device_;
 
-        //! store the swapchain to get acess to the command pool
-        SwapChain& chain_;
+        //! store Command Pool to be able to execute commands for copying
+        CommandPool &commandPool_;
 
         //! store the location of the buffer that vulkan gives us
         VkBuffer handle_{};

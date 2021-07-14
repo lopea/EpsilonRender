@@ -14,7 +14,7 @@ namespace Epsilon::Vulkan
     class CommandPool
     {
     public:
-        CommandPool(Device &device, uint32_t queueFamilyIndex);
+        explicit CommandPool(Device &device);
         CommandPool(Device& device, const VkCommandPoolCreateInfo& info);
 
         [[nodiscard]] VkCommandPool GetHandle() const {return handle_;}

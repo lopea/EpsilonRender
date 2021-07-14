@@ -251,9 +251,7 @@ namespace Epsilon::Vulkan
 
       CreateFrameBuffers();
 
-      commandPool_ = new CommandPool(Device_,
-                                     QueueFamilyIndices(Device_.GetPhysicalHandle(), surface_.GetSurfaceHandle())
-                                     .graphicsInd_.value());
+      commandPool_ = new CommandPool(Device_);
 
       commandBuffers_ = commandPool_->CreateCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, framesPerFlight);
 

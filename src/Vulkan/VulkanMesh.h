@@ -18,7 +18,7 @@ namespace Epsilon::Vulkan
     {
     public:
         template<typename VertContainer, typename IndContainer>
-        vkMesh(const VertContainer& verts, const IndContainer& indices, Device& device, SwapChain& swapChain);
+        vkMesh(const VertContainer& verts, const IndContainer& indices, Device& device, CommandPool& pool);
 
     private:
         Device& device_;
@@ -27,29 +27,35 @@ namespace Epsilon::Vulkan
     };
 
     template<typename VertContainer, typename IndContainer>
-    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device, SwapChain& swapChain) : Epsilon::Mesh_(verts, indices),
+    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device, CommandPool& pool) : Epsilon::Mesh_(verts, indices),
     device_(device),
-    vertexBuffer(device_,
-                 swapChain,
-                 vertices_.size() * sizeof(vertices_[0]),
-                 VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
-                 indexBuffer(device_,
-                             swapChain,
-                             indices_.size(),
-                             VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+                                                                                                                    vertexBuffer(
+                                                                                                                        device_,
+                                                                                                                        vertices_.size() *
+                                                                                                                        sizeof(vertices_[0]),
+                                                                                                                        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                                                                                                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                                                                                                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,pool),
+                                                                                                                    indexBuffer(
+                                                                                                                        device_,
+                                                                                                                        indices_.size(),
+                                                                                                                        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                                                                                                        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                                                                                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                                                                                                        pool)
     {
       //create a stage buffer for the vertex
-      Buffer vertStageBuffer(device_, swapChain,
-                         vertices_.size() * sizeof(vertices_[0]),
-                         VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+      Buffer vertStageBuffer(device_,
+                             vertices_.size() * sizeof(vertices_[0]),
+                             VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                             pool);
 
       //create a buffer for the index
-      Buffer indStageBuffer(device_, swapChain, indices_.size() * sizeof(indices_[0]),
+      Buffer indStageBuffer(device_, indices_.size() * sizeof(indices_[0]),
                             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                            pool);
 
       //set the data in the buffer
       vertStageBuffer.SetData(vertices_.data(), vertices_.size() * sizeof(vertices_[0]));

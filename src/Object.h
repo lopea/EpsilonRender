@@ -5,7 +5,7 @@
 #ifndef EPSILONRENDERER_OBJECT_H
 #define EPSILONRENDERER_OBJECT_H
 
-#include "Renderer.h"
+#include "RenderSystem.h"
 #include <list>
 #include <memory>
 

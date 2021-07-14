@@ -9,6 +9,8 @@
 #include "../Vulkan/VulkanInstance.h"
 #include "../ContextWindow.h"
 #include "../Vulkan/VulkanContextWindow.h"
+#include "../RenderSystem.h"
+#include "../Vulkan/VulkanRenderSystem.h"
 
 namespace Epsilon
 {
@@ -35,7 +37,7 @@ namespace Epsilon
 
       //delete context if necessary
       if (context)
-        UnlinkContext();
+        UnlinkSystem();
 
       //call the imgui shutdown
       ImGui::DestroyContext();
@@ -43,7 +45,7 @@ namespace Epsilon
 
 
     void ImGuiEnvironment::CreateForVulkan(GLFWwindow *window, Vulkan::Device &device, Vulkan::Instance &instance,
-                                           Vulkan::SwapChain &swapchain)
+                                           Vulkan::CommandPool &pool, Vulkan::SwapChain &swapChain)
     {
 
       ImGui_ImplVulkan_InitInfo info
@@ -53,10 +55,10 @@ namespace Epsilon
            device.GetGraphicsIndices(),
            device.GetGraphicsQueue(),
            nullptr,
-           swapchain.GetDescriptorPool().GetHandle(),
+           swapChain.GetDescriptorPool().GetHandle(),
            0,
-           swapchain.GetMinImageCount(),
-           swapchain.GetImageCount(),
+           swapChain.GetMinImageCount(),
+           swapChain.GetImageCount(),
            VK_SAMPLE_COUNT_1_BIT,
            nullptr,
            nullptr,
@@ -66,10 +68,10 @@ namespace Epsilon
       ImGui_ImplGlfw_InitForVulkan(window, true);
 
       //setup vulkan handle
-      ImGui_ImplVulkan_Init(&info, swapchain.GetRenderPass());
+      ImGui_ImplVulkan_Init(&info, swapChain.GetRenderPass());
 
       //initialize vulkan fonts
-      Vulkan::CommandBuffer buffer = swapchain.GetCommnandPool().CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+      Vulkan::CommandBuffer buffer = pool.CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
       //start recording
       buffer.BeginRecording();
@@ -95,7 +97,7 @@ namespace Epsilon
           [](ImDrawData *data)
           {
               //get the vulkan context from the window
-              Vulkan::ContextWindow *VulkanWindow = dynamic_cast<Vulkan::ContextWindow *> (context);
+              Vulkan::ContextWindow *VulkanWindow = dynamic_cast<Vulkan::ContextWindow *> (context->GetWindow(0));
 
               //draw all imgui data to the vulkan command buffer
               ImGui_ImplVulkan_RenderDrawData(data,
@@ -154,45 +156,48 @@ namespace Epsilon
     }
 
 
-    void ImGuiEnvironment::LinkContext(ContextWindow *window)
+    void ImGuiEnvironment::LinkSystem(Epsilon::RenderSystem *system, unsigned windowIndex)
     {
       //check if ImGui is even properly initialized
       if (!initialized_)
         throw std::runtime_error("Unable to intitalize ImGui vulkan context: ImGui context not initialized!!!");
 
       //dont do anything if the window is null or invalid
-      if (!window)
+      if (!system)
         throw std::runtime_error("ImGui Link Context Error: Window cannot be null!");
 
       //if a context already exists, unlink it
       if (context)
-        UnlinkContext();
+        UnlinkSystem();
 
       //check the type of window
-      switch (window->GetName())
+      switch (system->GetSpecificationType())
       {
         case SpecificationType::Vulkan:
         {
           //create handle for vulkan
-          Vulkan::ContextWindow *VulkanWindow = dynamic_cast<Vulkan::ContextWindow *>(window);
+          Vulkan::RenderSystem *VulkanSystem = dynamic_cast<Vulkan::RenderSystem*>(system);
+          Vulkan::ContextWindow *VulkanWindow = dynamic_cast<Vulkan::ContextWindow *>(system->GetWindow(windowIndex));
 
           //start initializing for vulkan
           CreateForVulkan(VulkanWindow->GetWindow(),
                           VulkanWindow->GetVulkanDevice(),
-                          VulkanWindow->GetVulkanInstance(),
+                          VulkanSystem->GetVulkanInstance(),
+                          VulkanWindow->GetVulkanSwapChain().GetCommnandPool(),
                           VulkanWindow->GetVulkanSwapChain());
         }
           break;
         case SpecificationType::OpenGL:
-          CreateForOpenGL(window->GetWindow());
+          CreateForOpenGL(system->GetWindow(windowIndex)->GetWindow());
           break;
         default:
           break;
       }
-      context = window;
+      context = system;
+      windowIndex_ = windowIndex;
     }
 
-    void ImGuiEnvironment::UnlinkContext()
+    void ImGuiEnvironment::UnlinkSystem()
     {
       //show error if unlinking is unnecessary
       if (!context)

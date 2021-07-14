@@ -20,7 +20,7 @@ namespace Epsilon::Vulkan
     class ContextWindow : public Epsilon::ContextWindow
     {
     public:
-        ContextWindow(unsigned width, unsigned height);
+        ContextWindow(unsigned width, unsigned height, Instance& instance);
 
 
         void Render(Shader shader);
@@ -29,8 +29,6 @@ namespace Epsilon::Vulkan
         void StartFrame() override;
         void OnResize(unsigned int width, unsigned int height) override;
 
-        //! @return the vulkan instance attached to this window context
-        [[nodiscard]] Instance& GetVulkanInstance() { return instance_; }
 
         //! @return Any screen related vulkan handles
         [[nodiscard]] Surface& GetVulkanSurface() { return surface_; }
@@ -43,7 +41,6 @@ namespace Epsilon::Vulkan
          */
         [[nodiscard]] SwapChain& GetVulkanSwapChain() { return swapChain_; }
     private:
-        Instance instance_;
         Surface surface_;
         Device device_;
         SwapChain swapChain_;
