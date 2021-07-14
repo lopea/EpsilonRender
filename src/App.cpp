@@ -7,6 +7,7 @@
 #include "ImGui/ImGuiContext.h"
 #include "OpenGL/OpenGLContextWindow.h"
 #include "Vulkan/VulkanRenderSystem.h"
+#include "OpenGL/OpenGLRenderSystem.h"
 
 
 #include <stdexcept>
@@ -21,7 +22,7 @@ namespace Epsilon
       try
       {
         //create a new system for rendering vulkan
-        renderer_ = new Vulkan::RenderSystem();
+        renderer_ = new OpenGL::RenderSystem();
 
         renderer_->PushBackNewWindow(width,height);
 

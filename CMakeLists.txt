@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 # include the library directory
 add_subdirectory(lib)
 
-
+#Any files that are used by all specifications will be here
 set(EPSILON_CORE_FILES
         src/main.cpp
         src/App.cpp
@@ -25,8 +25,27 @@ set(EPSILON_CORE_FILES
         src/Object.cpp
         src/Object.h
         src/ObjectManager.cpp
-        src/ObjectManager.h src/Transform.cpp src/Transform.h src/Math.h src/Epsilon.h src/OpenGL/glShader.cpp src/OpenGL/glShader.h)
+        src/ObjectManager.h
+        src/Transform.cpp
+        src/Transform.h
+        src/Math.h
+        src/Epsilon.h
+        src/Transform.cpp
+        src/Transform.h
+        src/ImGui/ImGuiContext.cpp
+        src/ImGui/ImGuiContext.h)
 
+#OpenGL related files
+set(EPSILON_OPENGL_FILES
+        src/OpenGL/glShader.cpp
+        src/OpenGL/glShader.h
+        src/OpenGL/OpenGLContextWindow.cpp
+        src/OpenGL/OpenGLContextWindow.h
+        src/OpenGL/OpenGLException.h
+        src/OpenGL/OpenGLRenderSystem.cpp
+        src/OpenGL/OpenGLRenderSystem.h)
+
+#Vulkan files
 set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanContextWindow.cpp
         src/Vulkan/VulkanContextWindow.h
@@ -55,13 +74,13 @@ set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanCommandBuffer.h
         src/Vulkan/VulkanCommandPool.cpp
         src/Vulkan/VulkanCommandPool.h
-        src/ImGui/ImGuiContext.cpp
-        src/ImGui/ImGuiContext.h
         src/Vulkan/VulkanDescriptorPool.cpp
-        src/Vulkan/VulkanDescriptorPool.h src/Transform.cpp src/Transform.h src/Vulkan/VulkanRenderSystem.cpp src/Vulkan/VulkanRenderSystem.h)
+        src/Vulkan/VulkanDescriptorPool.h
+        src/Vulkan/VulkanRenderSystem.cpp
+        src/Vulkan/VulkanRenderSystem.h)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} src/OpenGL/OpenGLContextWindow.cpp src/OpenGL/OpenGLContextWindow.h src/OpenGL/OpenGLException.h)
+add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} ${EPSILON_OPENGL_FILES})
 
 #set compiler flags
 if(MSVC)
