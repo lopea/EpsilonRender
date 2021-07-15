@@ -8,14 +8,33 @@
 #include "OpenGL/OpenGLContextWindow.h"
 #include "Vulkan/VulkanRenderSystem.h"
 #include "OpenGL/OpenGLRenderSystem.h"
+#include "RenderCommand.h"
 
 
 #include <stdexcept>
 #include <iostream>
+#include <fstream>
 
+
+std::vector<Epsilon::Vertex> vertices = {
+    // first triangle
+    {glm::vec3(0.5f, 0.5f, 0.0f)},  // top right
+    {glm::vec3(0.5f, -0.5f, 0.0f)},  // bottom right
+    {glm::vec3(-0.5f, 0.5f, 0.0f)},  // top left
+    // second triangle
+    {glm::vec3(0.5f, -0.5f, 0.0f)},  // bottom right
+    {glm::vec3(-0.5f, -0.5f, 0.0f)},  // bottom left
+    {glm::vec3(-0.5f, 0.5f, 0.0f)}   // top left
+};
+
+std::vector<unsigned int> indices = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+};
 namespace Epsilon
 {
     SpecificationType switchTo_;
+
     App::App(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
       ImGuiEnvironment::Initialize();
@@ -24,12 +43,12 @@ namespace Epsilon
         //create a new system for rendering vulkan
         renderer_ = new OpenGL::RenderSystem();
 
-        renderer_->PushBackNewWindow(width,height);
+        renderer_->PushBackNewWindow(width, height);
 
         ImGuiEnvironment::LinkSystem(renderer_);
 
 
-      }catch (std::runtime_error& ex)
+      } catch (std::runtime_error &ex)
       {
         std::cerr << ex.what() << std::endl;
       }
@@ -48,15 +67,26 @@ namespace Epsilon
 
     void App::Run()
     {
-      ContextWindow* window = renderer_->GetWindow(0);
+      ContextWindow *window = renderer_->GetWindow(0);
+
+      std::ifstream vertFile("vert.spv"), fragFile("frag.spv");
+      std::vector<unsigned char> vertData((std::istreambuf_iterator<char>(vertFile)),
+                                          (std::istreambuf_iterator<char>())),
+          fragData((std::istreambuf_iterator<char>(fragFile)), (std::istreambuf_iterator<char>()));
+
+      glShader shader(vertData, fragData);
+
+      OpenGL::Mesh mesh(vertices, indices);
+
       //run the program until the user wants it to close
-      while(!window->WillClose())
+      while (!window->WillClose())
       {
         ImGuiEnvironment::StartFrame();
         ImGui::ShowDemoWindow();
 
         //clear the previous frame
         window->StartFrame();
+        dynamic_cast<OpenGL::RenderSystem*>(renderer_)->Render(&shader, mesh);
         //run any renderer specific actions
         ImGuiEnvironment::RenderToContext();
         Update();
@@ -69,6 +99,6 @@ namespace Epsilon
 
     void App::Update()
     {
-        objManager_.Update();
+      objManager_.Update();
     }
 }

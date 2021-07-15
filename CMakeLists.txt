@@ -33,7 +33,7 @@ set(EPSILON_CORE_FILES
         src/Transform.cpp
         src/Transform.h
         src/ImGui/ImGuiContext.cpp
-        src/ImGui/ImGuiContext.h)
+        src/ImGui/ImGuiContext.h src/RenderCommand.cpp src/RenderCommand.h)
 
 #OpenGL related files
 set(EPSILON_OPENGL_FILES
@@ -43,7 +43,7 @@ set(EPSILON_OPENGL_FILES
         src/OpenGL/OpenGLContextWindow.h
         src/OpenGL/OpenGLException.h
         src/OpenGL/OpenGLRenderSystem.cpp
-        src/OpenGL/OpenGLRenderSystem.h)
+        src/OpenGL/OpenGLRenderSystem.h src/OpenGL/glMesh.cpp src/OpenGL/glMesh.h)
 
 #Vulkan files
 set(EPSILON_VULKAN_FILES

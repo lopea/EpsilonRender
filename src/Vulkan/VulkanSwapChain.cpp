@@ -416,6 +416,7 @@ namespace Epsilon::Vulkan
     }
 
     void SwapChain::FinishFrame()
+
     {
       //dont render anything if the swapchain cant present anything
       if (!allowRendering)

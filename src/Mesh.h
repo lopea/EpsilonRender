@@ -56,8 +56,6 @@ namespace Epsilon
         std::vector<uint64_t> indices_;
     };
 
-    //make pointer to mesh more user friendly
-    using Mesh = Mesh_*;
 }
 
 #endif //EPSILONRENDERER_MESH_H

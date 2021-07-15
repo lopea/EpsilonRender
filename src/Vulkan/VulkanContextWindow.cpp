@@ -59,7 +59,7 @@ namespace Epsilon::Vulkan
 
     void ContextWindow::Render(Shader shader)
     {
-      if(shader->GetShaderType() == SpecificationType::Vulkan)
+/*      if(shader->GetShaderType() == SpecificationType::Vulkan)
       {
         vkShader* vShader = dynamic_cast<vkShader*>(shader);
 
@@ -68,7 +68,7 @@ namespace Epsilon::Vulkan
       else
       {
         std::cerr << "Unknown Shader Type!" <<std::endl;
-      }
+      }*/
     }
 
     void ContextWindow::StartFrame()

@@ -11,12 +11,16 @@ namespace Epsilon
 {
     enum class SpecificationType;
 
-    class Shader_
+    class ShaderSpecificationBase
     {
     public:
         virtual SpecificationType GetShaderType() const = 0;
     };
 
-    using Shader = Shader_ *;
+    struct Shader
+    {
+    public:
+
+    };
 }
 #endif //EPSILONRENDERER_SHADER_H

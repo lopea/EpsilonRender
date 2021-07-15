@@ -23,7 +23,7 @@ namespace Epsilon::Vulkan
 
     Shader RenderSystem::GetShader(const std::string &shaderName)
     {
-      return nullptr;
+      return Shader();
     }
 
     RenderSystem::~RenderSystem()

@@ -9,17 +9,21 @@
 #include <unordered_map>
 #include "../RenderSystem.h"
 #include "glShader.h"
+#include "glMesh.h"
 
 namespace Epsilon::OpenGL
 {
     class RenderSystem : public Epsilon::RenderSystem
     {
     public:
-        RenderSystem(): Epsilon::RenderSystem(SpecificationType::OpenGL){};
+        RenderSystem(): Epsilon::RenderSystem(SpecificationType::OpenGL)
+        {
+        };
+        void Render(glShader* shader, OpenGL::Mesh& mesh);
         ContextWindow * PushBackNewWindow(unsigned int width, unsigned int height) override;
-        Shader GetShader(const std::string &shaderName) override{ return nullptr;}
+        Shader GetShader(const std::string &shaderName) override{ return Shader();}
     private:
-        std::unordered_map<std::string, Shader> shaders;
+        std::unordered_map<std::string, glShader> shaders_;
     };
 }
 

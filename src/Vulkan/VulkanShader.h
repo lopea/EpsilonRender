@@ -12,7 +12,7 @@
 
 namespace Epsilon::Vulkan
 {
-    class vkShader : public Shader_
+    class vkShader : public ShaderSpecificationBase
     {
     public:
         [[nodiscard]] SpecificationType GetShaderType() const override;
