@@ -19,7 +19,7 @@ namespace Epsilon::OpenGL
       unsigned program = *static_cast<const unsigned*>(shader->GetShaderHandle());
       glUseProgram(program);
       glBindVertexArray(*static_cast<const unsigned*>(mesh.GetMeshHandle()));
-      glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT , 0);
+      glDrawElements(GL_TRIANGLES, mesh.GetIndexCount(), GL_UNSIGNED_INT , nullptr);
       glBindVertexArray(0);
       glUseProgram(0);
     }
