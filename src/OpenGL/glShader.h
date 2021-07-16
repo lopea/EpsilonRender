@@ -15,7 +15,7 @@ namespace Epsilon
     class glShader : public ShaderSpecificationBase
     {
     public:
-        explicit glShader(const std::vector<unsigned char>& vertexData, const std::vector<unsigned char>& fragData);
+        explicit glShader(const std::vector<char> &vertexData, const std::vector<char> &fragData);
         [[nodiscard]] SpecificationType GetShaderType() const override { return SpecificationType::OpenGL;}
         [[nodiscard]] const void* GetShaderHandle() const { return &program_;}
 

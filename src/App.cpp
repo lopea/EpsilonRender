@@ -69,8 +69,8 @@ namespace Epsilon
     {
       ContextWindow *window = renderer_->GetWindow(0);
 
-      std::ifstream vertFile("vert.spv"), fragFile("frag.spv");
-      std::vector<unsigned char> vertData((std::istreambuf_iterator<char>(vertFile)),
+      std::ifstream vertFile("vert.spv", std::ios_base::binary), fragFile("frag.spv", std::ios_base::binary);
+      std::vector<char> vertData((std::istreambuf_iterator<char>(vertFile)),
                                           (std::istreambuf_iterator<char>())),
           fragData((std::istreambuf_iterator<char>(fragFile)), (std::istreambuf_iterator<char>()));
 
@@ -81,7 +81,7 @@ namespace Epsilon
       //run the program until the user wants it to close
       while (!window->WillClose())
       {
-        ImGuiEnvironment::StartFrame();
+       ImGuiEnvironment::StartFrame();
         ImGui::ShowDemoWindow();
 
         //clear the previous frame

@@ -42,7 +42,6 @@ set(EPSILON_OPENGL_FILES
         src/OpenGL/OpenGLContextWindow.cpp
         src/OpenGL/OpenGLContextWindow.h
         src/OpenGL/OpenGLException.h
-        src/OpenGL/OpenGLRenderSystem.cpp
         src/OpenGL/OpenGLRenderSystem.h src/OpenGL/glMesh.cpp src/OpenGL/glMesh.h)
 
 #Vulkan files
@@ -80,7 +79,7 @@ set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanRenderSystem.h)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} ${EPSILON_OPENGL_FILES})
+add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} ${EPSILON_OPENGL_FILES} src/OpenGL/OpenGLRenderSystem.cpp)
 
 #set compiler flags
 if(MSVC)

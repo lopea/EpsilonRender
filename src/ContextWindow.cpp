@@ -17,6 +17,10 @@ namespace Epsilon
       {
         //call the resize callback on the context window
         context->OnResize(width,height);
+        context->width_ = width;
+        context->height_ = height;
+
+
       }
     }
     void ContextWindow::SetWindowHandle(GLFWwindow *newWindow)
