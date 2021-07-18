@@ -39,7 +39,7 @@ namespace Epsilon
         indices_(indices.begin(), indices.end()){}
 
         [[nodiscard]] std::vector<Vertex> GetVertices() const{ return vertices_;}
-        [[nodiscard]] std::vector<uint64_t> GetIndices() const { return indices_;}
+        [[nodiscard]] std::vector<unsigned> GetIndices() const { return indices_;}
 
         /*!
          * @return Get the Specification that this mesh was created in.
@@ -53,7 +53,7 @@ namespace Epsilon
 
     protected:
         std::vector<Vertex> vertices_;
-        std::vector<uint64_t> indices_;
+        std::vector<unsigned> indices_;
     };
 
 }

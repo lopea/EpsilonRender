@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 20)
 # include the library directory
 add_subdirectory(lib)
 
+#include the shaders directory for compilation
+add_subdirectory(Shaders)
+
 #Any files that are used by all specifications will be here
 set(EPSILON_CORE_FILES
         src/main.cpp
@@ -112,3 +115,7 @@ target_compile_definitions(EpsilonRenderer PRIVATE ${PREPROCESSOR_DIR})
 
 # link the available libraries
 target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp imgui glad)
+
+
+
+add_dependencies(EpsilonRenderer spv_shaders)

@@ -21,15 +21,12 @@ std::vector<Epsilon::Vertex> vertices = {
     {glm::vec3(0.5f, 0.5f, 0.0f)},  // top right
     {glm::vec3(0.5f, -0.5f, 0.0f)},  // bottom right
     {glm::vec3(-0.5f, 0.5f, 0.0f)},  // top left
-    // second triangle
-    {glm::vec3(0.5f, -0.5f, 0.0f)},  // bottom right
     {glm::vec3(-0.5f, -0.5f, 0.0f)},  // bottom left
-    {glm::vec3(-0.5f, 0.5f, 0.0f)}   // top left
 };
 
 std::vector<unsigned int> indices = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
+    0, 2, 1,   // first triangle
+    2, 3, 1    // second triangle
 };
 namespace Epsilon
 {
@@ -69,8 +66,9 @@ namespace Epsilon
     {
       ContextWindow *window = renderer_->GetWindow(0);
 
-      std::ifstream vertFile("vert.spv"), fragFile("frag.spv");
-      std::vector<unsigned char> vertData((std::istreambuf_iterator<char>(vertFile)),
+      std::ifstream vertFile("test.vert.spv", std::ios_base::in | std::ios_base::binary),
+      fragFile("test.frag.spv", std::ios_base::in | std::ios_base::binary);
+      std::vector<char> vertData((std::istreambuf_iterator<char>(vertFile)),
                                           (std::istreambuf_iterator<char>())),
           fragData((std::istreambuf_iterator<char>(fragFile)), (std::istreambuf_iterator<char>()));
 

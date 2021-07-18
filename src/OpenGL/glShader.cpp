@@ -9,7 +9,7 @@ namespace Epsilon
 {
 
 
-    glShader::glShader(const std::vector<unsigned char> &vertexData, const std::vector<unsigned char> &fragData)
+    glShader::glShader(const std::vector<char> &vertexData, const std::vector<char> &fragData)
     {
       //create shader handles
       GLuint vs = glCreateShader(GL_VERTEX_SHADER), fs = glCreateShader(GL_FRAGMENT_SHADER);
