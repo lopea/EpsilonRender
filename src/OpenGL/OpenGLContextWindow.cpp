@@ -30,6 +30,7 @@ namespace Epsilon::OpenGL
         throw InitializationException("Unable to initialize GLFW!!!");
       //make sure gl api is available
       glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+      glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
       //set gl version to 4.6 (needs SPIR-V support)
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

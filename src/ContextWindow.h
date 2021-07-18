@@ -77,6 +77,8 @@ namespace Epsilon
         //! height of the window the renderer will use
         unsigned height_;
 
+        friend void glfwOnResize(GLFWwindow* window, int width, int height);
+
         void PopulateGLFWHandle();
     };
 }

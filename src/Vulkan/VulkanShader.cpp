@@ -100,7 +100,7 @@ namespace Epsilon::Vulkan
       VkDynamicState DynamicStates[] { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
 
       //set the states to the info struct
-      dynamicStateCreateInfo.dynamicStateCount = std::size(DynamicStates);
+      dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(std::size(DynamicStates));
       dynamicStateCreateInfo.pDynamicStates = DynamicStates;
 
       ////////////////////////////////////////////////////

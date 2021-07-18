@@ -45,7 +45,6 @@ set(EPSILON_OPENGL_FILES
         src/OpenGL/OpenGLContextWindow.cpp
         src/OpenGL/OpenGLContextWindow.h
         src/OpenGL/OpenGLException.h
-        src/OpenGL/OpenGLRenderSystem.cpp
         src/OpenGL/OpenGLRenderSystem.h src/OpenGL/glMesh.cpp src/OpenGL/glMesh.h)
 
 #Vulkan files
@@ -83,12 +82,12 @@ set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanRenderSystem.h)
 
 # add all necessary files for the executable project
-add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} ${EPSILON_OPENGL_FILES})
+add_executable(EpsilonRenderer ${EPSILON_CORE_FILES} ${EPSILON_VULKAN_FILES} ${EPSILON_OPENGL_FILES} src/OpenGL/OpenGLRenderSystem.cpp)
 
 #set compiler flags
 if(MSVC)
     #windows compiler flags
-    set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "/W4 /WX /arch:AVX2 /Od")
+    set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "/W3 /WX /arch:AVX2 /Od /Wv:18")
 else()
     # linux compile flags
     set_target_properties(EpsilonRenderer PROPERTIES COMPILE_FLAGS "-Wall -Werror -Wextra  \

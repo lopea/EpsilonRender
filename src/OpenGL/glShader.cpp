@@ -3,6 +3,7 @@
 //
 
 #include <stdexcept>
+#include <iostream>
 #include "glShader.h"
 
 namespace Epsilon
@@ -16,10 +17,15 @@ namespace Epsilon
 
       //start compiling the SPIR-V shaders
       glShaderBinary(1, &vs, GL_SHADER_BINARY_FORMAT_SPIR_V, vertexData.data(), static_cast<GLint>(vertexData.size()));
+      std::cerr << glGetError() <<std::endl;
       glShaderBinary(1, &fs, GL_SHADER_BINARY_FORMAT_SPIR_V, fragData.data(), static_cast<GLint>(fragData.size()));
+      std::cerr << glGetError() <<std::endl;
+
 
       //tell each shader how to be executed (this is the equivalent to compiling the shader)
       glSpecializeShader(vs, "main", 0, nullptr, nullptr);
+
+
 
       //check for errors
       int err;
@@ -49,6 +55,8 @@ namespace Epsilon
       }
 
       glSpecializeShader(fs, "main", 0, nullptr, nullptr);
+
+
 
       //check for errors
       glGetShaderiv(fs, GL_COMPILE_STATUS, &err);
