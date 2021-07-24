@@ -4,7 +4,7 @@
 layout (std140, binding = 3) uniform UniformData
 {
     float value;
-};
+}data;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -15,7 +15,7 @@ layout(location = 1) out vec2 outUV;
 
 void main() {
     gl_Position = vec4(currentPosition,1.0);
-    fragColor = vec4(1,value,0,1);
+    fragColor = vec4(1,data.value,0,1);
     //set uv flags
     outUV = uv;
 }

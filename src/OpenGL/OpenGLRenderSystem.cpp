@@ -28,11 +28,10 @@ namespace Epsilon::OpenGL
 
       OpenGL::RenderPipeline* glPipeline = openGLData_.GetPipeline(shader.GetRenderPasses().front());
       unsigned program = *static_cast<const unsigned*>(glPipeline->GetShaderHandle());
+      glUseProgram(program);
       for(const auto& [key,value] : uniformData)
       {
         Buffer* buffer = UpdateBuffer(key, value);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, buffer->GetHandle());
 
         glBindBufferBase(GL_UNIFORM_BUFFER, key, buffer->GetHandle());
 
@@ -43,7 +42,6 @@ namespace Epsilon::OpenGL
         }
       }
 
-      glUseProgram(program);
       glBindVertexArray(*static_cast<unsigned*>(mesh.GetMeshHandle()));
       glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(mesh.GetIndexCount()), GL_UNSIGNED_INT , nullptr);
       glBindVertexArray(0);
