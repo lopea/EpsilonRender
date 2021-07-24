@@ -7,7 +7,7 @@
 #include <set>
 #include "VulkanDevice.h"
 #include "VulkanException.h"
-#include "../SwapChainContext.h"
+#include "SwapChainContext.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "VulkanQueueFamilies.h"

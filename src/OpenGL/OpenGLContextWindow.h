@@ -18,8 +18,6 @@ namespace Epsilon::OpenGL
         void StartFrame() override;
         void EndFrame() override;
 
-        //! @return What specification we are using. In this case OpenGL will be returned.
-        SpecificationType GetName() override { return SpecificationType::OpenGL; }
 
 
     };

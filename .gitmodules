@@ -11,3 +11,6 @@
 	path = lib/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "glslang"]
+	path = lib/glslang
+	url = https://github.com/KhronosGroup/glslang

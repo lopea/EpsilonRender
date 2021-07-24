@@ -14,7 +14,7 @@
 
 namespace Epsilon::Vulkan
 {
-    class vkMesh : public Epsilon::Mesh_
+    class vkMesh : public Epsilon::Mesh
     {
     public:
         template<typename VertContainer, typename IndContainer>
@@ -27,7 +27,7 @@ namespace Epsilon::Vulkan
     };
 
     template<typename VertContainer, typename IndContainer>
-    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device, CommandPool& pool) : Epsilon::Mesh_(verts, indices),
+    vkMesh::vkMesh(const VertContainer &verts, const IndContainer &indices, Device& device, CommandPool& pool) : Epsilon::Mesh(verts, indices),
     device_(device),
                                                                                                                     vertexBuffer(
                                                                                                                         device_,

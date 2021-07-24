@@ -13,6 +13,10 @@ add_subdirectory(docs)
 #include gl extensions
 add_subdirectory(glad)
 
+#add spirv compiler
+add_subdirectory(glslang)
+
+
 #add library to link with imgui
 add_library(imgui INTERFACE)
 

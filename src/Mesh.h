@@ -21,11 +21,11 @@ namespace Epsilon
         //! object space normal direction for the vertex's corresponding triangles
         glm::vec3 normal;
     };
-    class Mesh_
+    class Mesh
     {
     public:
 
-        virtual ~Mesh_() = default;
+        virtual ~Mesh() = default;
         /*!
          * Create a mesh with a set of vertices and indices for those vertices
          * @tparam VertContainer the type of the container for the vertices ( needs a .begin() and a .end() )
@@ -34,17 +34,12 @@ namespace Epsilon
          * @param indices all the indices for the new mesh
          */
         template<typename VertContainer, typename IndContainer>
-        Mesh_(const VertContainer& vertices, const IndContainer& indices)
+        Mesh(const VertContainer& vertices, const IndContainer& indices)
         :vertices_(vertices.begin(), vertices.end()),
         indices_(indices.begin(), indices.end()){}
 
         [[nodiscard]] std::vector<Vertex> GetVertices() const{ return vertices_;}
         [[nodiscard]] std::vector<unsigned> GetIndices() const { return indices_;}
-
-        /*!
-         * @return Get the Specification that this mesh was created in.
-         */
-        virtual SpecificationType GetMeshType() = 0;
 
         /*!
          * @return Get the reference of the mesh for specification specific purposes

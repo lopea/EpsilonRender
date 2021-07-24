@@ -9,7 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "ContextWindow.h"
-#include "ObjectManager.h"
+#include "RenderSystem.h"
 
 namespace Epsilon
 {
@@ -28,7 +28,7 @@ namespace Epsilon
 
         GLFWwindow *handle_;
         RenderSystem* renderer_;
-        ObjectManager objManager_;
+
     };
 }
 

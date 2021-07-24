@@ -23,29 +23,22 @@ set(EPSILON_CORE_FILES
         src/RenderSystem.h
         src/Mesh.cpp
         src/Mesh.h
-        src/Shader.cpp
-        src/Shader.h
-        src/Object.cpp
-        src/Object.h
-        src/ObjectManager.cpp
-        src/ObjectManager.h
-        src/Transform.cpp
-        src/Transform.h
+        src/ShaderModule.h
         src/Math.h
         src/Epsilon.h
-        src/Transform.cpp
-        src/Transform.h
         src/ImGui/ImGuiContext.cpp
-        src/ImGui/ImGuiContext.h src/RenderCommand.cpp src/RenderCommand.h)
+        src/ImGui/ImGuiContext.h
+        src/RenderPipeline.cpp
+        src/RenderPipeline.h src/SpecificationData.hpp src/Material.cpp src/Material.h)
 
 #OpenGL related files
 set(EPSILON_OPENGL_FILES
-        src/OpenGL/glShader.cpp
-        src/OpenGL/glShader.h
+        src/OpenGL/OpenGLRenderPipeline.cpp
+        src/OpenGL/OpenGLRenderPipeline.h
         src/OpenGL/OpenGLContextWindow.cpp
         src/OpenGL/OpenGLContextWindow.h
         src/OpenGL/OpenGLException.h
-        src/OpenGL/OpenGLRenderSystem.h src/OpenGL/glMesh.cpp src/OpenGL/glMesh.h)
+        src/OpenGL/OpenGLRenderSystem.h src/OpenGL/glMesh.cpp src/OpenGL/glMesh.h src/OpenGL/OpenGLBuffer.cpp src/OpenGL/OpenGLBuffer.h)
 
 #Vulkan files
 set(EPSILON_VULKAN_FILES
@@ -59,7 +52,7 @@ set(EPSILON_VULKAN_FILES
         src/Vulkan/VulkanInstance.h
         src/Vulkan/VulkanException.h
         src/Vulkan/VulkanQueueFamilies.h
-        src/SwapChainContext.h
+        src/Vulkan/SwapChainContext.h
         src/Vulkan/VulkanDevice.cpp
         src/Vulkan/VulkanDevice.h
         src/Vulkan/VulkanSurface.cpp
@@ -99,7 +92,7 @@ find_package(Vulkan REQUIRED)
 #add preprocessor directive
 
 # set preprocessor directive that are cross platform
-set(PREPROCESSOR_DIR GLFW_INCLUDE_VULKAN GLFW_INCLUDE_NONE IMGUI_IMPL_OPENGL_LOADER_GLAD)
+set(PREPROCESSOR_DIR GLFW_INCLUDE_VULKAN GLFW_INCLUDE_NONE IMGUI_IMPL_OPENGL_LOADER_GLAD2)
 
 # set platform specific directives
 if(MSVC)
@@ -113,7 +106,7 @@ endif()
 target_compile_definitions(EpsilonRenderer PRIVATE ${PREPROCESSOR_DIR})
 
 # link the available libraries
-target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp imgui glad)
+target_link_libraries(EpsilonRenderer glfw Vulkan::Vulkan glm assimp imgui glad glslang SPIRV)
 
 
 

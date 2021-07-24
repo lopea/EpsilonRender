@@ -4,7 +4,7 @@
 
 #include "OpenGLContextWindow.h"
 #include "OpenGLException.h"
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <iostream>
 
 namespace Epsilon::OpenGL
@@ -52,7 +52,7 @@ namespace Epsilon::OpenGL
       //dont enable vsync for now
       glfwSwapInterval(0);
       //initialize glad extension
-      gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+      gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress));
       //set the new window as the window this context
       SetWindowHandle(newWindow);
       // During init, enable debug output
@@ -72,7 +72,7 @@ namespace Epsilon::OpenGL
     void ContextWindow::StartFrame()
     {
       //set background color
-      glClearColor(0,0,0,0);
+      glClearColor(0,0,0,255);
       //clear current buffer
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

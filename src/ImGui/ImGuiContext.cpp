@@ -181,9 +181,9 @@ namespace Epsilon
 
           //start initializing for vulkan
           CreateForVulkan(VulkanWindow->GetWindow(),
-                          VulkanWindow->GetVulkanDevice(),
+                          VulkanSystem->GetVulkanDevice(),
                           VulkanSystem->GetVulkanInstance(),
-                          VulkanWindow->GetVulkanSwapChain().GetCommnandPool(),
+                          VulkanSystem->GetCommandPool(),
                           VulkanWindow->GetVulkanSwapChain());
         }
           break;

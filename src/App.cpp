@@ -8,8 +8,7 @@
 #include "OpenGL/OpenGLContextWindow.h"
 #include "Vulkan/VulkanRenderSystem.h"
 #include "OpenGL/OpenGLRenderSystem.h"
-#include "RenderCommand.h"
-
+#include "RenderPipeline.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -18,10 +17,10 @@
 
 std::vector<Epsilon::Vertex> vertices = {
     // first triangle
-    {glm::vec3(0.5f, 0.5f, 0.0f)},  // top right
-    {glm::vec3(0.5f, -0.5f, 0.0f)},  // bottom right
-    {glm::vec3(-0.5f, 0.5f, 0.0f)},  // top left
-    {glm::vec3(-0.5f, -0.5f, 0.0f)},  // bottom left
+    {glm::vec3(1, 1, 0.0f),glm::vec2(1)},  // top right
+    {glm::vec3(1, -1, 0.0f),glm::vec2(1,0)},  // bottom right
+    {glm::vec3(-1, 1, 0.0f),glm::vec2(0,1)},  // top left
+    {glm::vec3(-1, -1, 0.0f),glm::vec2(1,0)},  // bottom left
 };
 
 std::vector<unsigned int> indices = {  // note that we start from 0!
@@ -30,19 +29,20 @@ std::vector<unsigned int> indices = {  // note that we start from 0!
 };
 namespace Epsilon
 {
+    Vulkan::RenderSystem * system;
     SpecificationType switchTo_;
 
     App::App(unsigned width, unsigned height) : handle_(nullptr), renderer_(nullptr)
     {
-      ImGuiEnvironment::Initialize();
       try
       {
+
         //create a new system for rendering vulkan
         renderer_ = new OpenGL::RenderSystem();
 
         renderer_->PushBackNewWindow(width, height);
 
-        ImGuiEnvironment::LinkSystem(renderer_);
+
 
 
       } catch (std::runtime_error &ex)
@@ -54,9 +54,11 @@ namespace Epsilon
     App::~App()
     {
 
-      ImGuiEnvironment::Shutdown();
+
       //delete the renderer specification
       delete renderer_;
+
+      delete system;
 
       //terminate glfw
       glfwTerminate();
@@ -66,29 +68,41 @@ namespace Epsilon
     {
       ContextWindow *window = renderer_->GetWindow(0);
 
-      std::ifstream vertFile("test.vert.spv", std::ios_base::in | std::ios_base::binary),
-      fragFile("test.frag.spv", std::ios_base::in | std::ios_base::binary);
+      std::ifstream vertFile("Shaders/test.vert.spv", std::ios_base::in | std::ios_base::binary),
+      fragFile("Shaders/test.frag.spv", std::ios_base::in | std::ios_base::binary);
+
       std::vector<char> vertData((std::istreambuf_iterator<char>(vertFile)),
                                           (std::istreambuf_iterator<char>())),
           fragData((std::istreambuf_iterator<char>(fragFile)), (std::istreambuf_iterator<char>()));
 
-      glShader shader(vertData, fragData);
 
+
+      ShaderModule vertModule("test.vert", SHADER_STAGE_VERTEX, vertData),
+                  fragModule("test.frag", SHADER_STAGE_FRAGMENT, fragData);
+
+      std::vector<ShaderModule*> modules { &vertModule, &fragModule};
+
+      Epsilon::RenderPipeline pipeline("Test Shader", modules);
+
+      Epsilon::Material material;
+      material.AddPass(&pipeline);
       OpenGL::Mesh mesh(vertices, indices);
 
+      float data{};
       //run the program until the user wants it to close
       while (!window->WillClose())
       {
-        ImGuiEnvironment::StartFrame();
-        ImGui::ShowDemoWindow();
+
+        data = static_cast<float>(glfwGetTime());
 
         //clear the previous frame
         window->StartFrame();
-        dynamic_cast<OpenGL::RenderSystem*>(renderer_)->Render(&shader, mesh);
+        material.SetUniformData(3, sizeof(float), &data);
+        dynamic_cast<OpenGL::RenderSystem*>(renderer_)->Render(material, mesh);
         //run any renderer specific actions
-        ImGuiEnvironment::RenderToContext();
         Update();
         window->EndFrame();
+
 
         glfwPollEvents();
       }
@@ -97,6 +111,5 @@ namespace Epsilon
 
     void App::Update()
     {
-      objManager_.Update();
     }
 }

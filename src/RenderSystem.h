@@ -5,11 +5,20 @@
 #ifndef EPSILONRENDERER_RENDERSYSTEM_H
 #define EPSILONRENDERER_RENDERSYSTEM_H
 
-#include "Shader.h"
-#include "Mesh.h"
+#include <vector>
+#include <unordered_map>
 
 namespace Epsilon
 {
+    enum class SpecificationType
+    {
+        Vulkan = 0,
+        OpenGL = 1,
+        Count,
+    };
+    class ContextWindow;
+    class RenderPipeline;
+    class Mesh;
     class RenderSystem
     {
     public:
@@ -22,15 +31,11 @@ namespace Epsilon
         virtual ContextWindow* PushBackNewWindow(unsigned width, unsigned height) = 0;
 
         ContextWindow* GetWindow(unsigned index = 0) {return windows_[index];}
+
+        void Render(const RenderPipeline *pipeline, const Mesh *mesh, unsigned window = 0);
         [[nodiscard]] const ContextWindow* GetWindow(unsigned index) const {return windows_[index];}
 
         [[nodiscard]] bool IsEmpty() const { return windows_.empty();}
-
-
-        virtual Shader GetShader(const std::string& shaderName) = 0;
-
-
-
 
     protected:
         std::vector<ContextWindow*> windows_;

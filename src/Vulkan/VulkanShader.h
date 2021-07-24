@@ -6,16 +6,15 @@
 #define EPSILONRENDERER_VULKANSHADER_H
 
 #include <string>
-#include "../Shader.h"
 #include "vulkan/vulkan.h"
 #include "VulkanContextWindow.h"
 
 namespace Epsilon::Vulkan
 {
-    class vkShader : public ShaderSpecificationBase
+    class vkShader
     {
     public:
-        [[nodiscard]] SpecificationType GetShaderType() const override;
+
 
         vkShader(const std::string &vertFileLocation, const std::string &fragFileLocation,
                  Vulkan::SwapChain& swapChain_);

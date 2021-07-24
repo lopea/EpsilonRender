@@ -6,7 +6,10 @@
 #define EPSILONRENDERER_CONTEXTWINDOW_H
 
 #include <string>
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
+
+
 #include "Epsilon.h"
 struct GLFWwindow;
 
@@ -31,9 +34,6 @@ namespace Epsilon
         //! @return the handle associated with this window
         GLFWwindow *GetWindow()
         { return handle_; };
-
-        //! @return Get the name of the render specification
-        virtual SpecificationType GetName() = 0;
 
         //! making sure destructors work for derived classes
         virtual ~ContextWindow()

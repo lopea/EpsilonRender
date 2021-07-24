@@ -31,5 +31,11 @@ namespace Epsilon
       windows_.clear();
     }
 
+    void RenderSystem::Render(const RenderPipeline *pipeline, const Mesh *mesh, unsigned int window)
+    {
+
+
+    }
+
 
 }

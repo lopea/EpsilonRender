@@ -33,16 +33,11 @@ namespace Epsilon::Vulkan
       return handle;
     }
 
-    SpecificationType ContextWindow::GetName()
-    {
-      return SpecificationType::Vulkan;
-    }
-
-    ContextWindow::ContextWindow(unsigned width, unsigned height, Instance& instance)
+    ContextWindow::ContextWindow(unsigned width, unsigned height, Instance &instance, Device &device,
+                                 CommandPool &pool)
     : Epsilon::ContextWindow(width, height, CreateHandleWindow(width, height)),
       surface_(GetWindow(), instance),
-      device_(instance, surface_),
-      swapChain_(device_, surface_, GetWindow())
+      swapChain_(device, surface_, GetWindow(), pool)
     {
 
     }
@@ -57,22 +52,9 @@ namespace Epsilon::Vulkan
 
     }
 
-    void ContextWindow::Render(Shader shader)
-    {
-/*      if(shader->GetShaderType() == SpecificationType::Vulkan)
-      {
-        vkShader* vShader = dynamic_cast<vkShader*>(shader);
-
-        swapChain_.RenderShader(vShader);
-      }
-      else
-      {
-        std::cerr << "Unknown Shader Type!" <<std::endl;
-      }*/
-    }
-
     void ContextWindow::StartFrame()
     {
+      glfwMakeContextCurrent(GetWindow());
       //clear the selected frame buffer
       swapChain_.ClearFrame();
 

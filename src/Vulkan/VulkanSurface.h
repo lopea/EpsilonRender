@@ -25,6 +25,8 @@ namespace Epsilon::Vulkan
     private:
         VkSurfaceKHR vkSurface_;
         Instance& instance_;
+        GLFWwindow * window_;
+        bool dummy_;
     };
 }
 

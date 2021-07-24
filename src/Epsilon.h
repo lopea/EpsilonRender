@@ -7,12 +7,7 @@
 
 namespace Epsilon
 {
-    enum class SpecificationType
-    {
-        Vulkan = 0,
-        OpenGL = 1,
-        Count,
-    };
+
 }
 
 #endif //EPSILONRENDERER_EPSILON_H

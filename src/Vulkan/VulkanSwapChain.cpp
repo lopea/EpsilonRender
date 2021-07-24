@@ -7,15 +7,15 @@
 #include "VulkanSwapChain.h"
 #include "VulkanDevice.h"
 #include "VulkanSurface.h"
-#include "../SwapChainContext.h"
+#include "SwapChainContext.h"
 #include "VulkanQueueFamilies.h"
 #include "VulkanException.h"
 #include "VulkanShader.h"
 
 namespace Epsilon::Vulkan
 {
-    SwapChain::SwapChain(Device &device, Surface &screen, GLFWwindow *window)
-        : Device_(device), surface_(screen), windowHandle_(window)
+    SwapChain::SwapChain(Device &device, Surface &screen, GLFWwindow *window, CommandPool& pool)
+        : Device_(device), surface_(screen), pool_(pool), windowHandle_(window)
     {
       //create the swapchain and connect it to the window
       Initialize();
@@ -251,9 +251,7 @@ namespace Epsilon::Vulkan
 
       CreateFrameBuffers();
 
-      commandPool_ = new CommandPool(Device_);
-
-      commandBuffers_ = commandPool_->CreateCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, framesPerFlight);
+      commandBuffers_ = pool_.CreateCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, framesPerFlight);
 
       CreateSemaphores();
 
@@ -281,9 +279,12 @@ namespace Epsilon::Vulkan
       //remove all the views associated with the swapchain
       for (auto imageView: views_)
         vkDestroyImageView(Device_.GetLogicalHandle(), imageView, nullptr);
+
+      for(auto& command : commandBuffers_)
+        command.Free();
+
       commandBuffers_.clear();
 
-      delete commandPool_;
 
       //destroy the swapchain
       vkDestroySwapchainKHR(Device_.GetLogicalHandle(), handle_, nullptr);

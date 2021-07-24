@@ -7,9 +7,13 @@
 
 
 #include <unordered_map>
+#include <stack>
+#include <vector>
 #include "../RenderSystem.h"
-#include "glShader.h"
 #include "glMesh.h"
+#include "OpenGLRenderPipeline.h"
+#include "../SpecificationData.hpp"
+#include "../Material.h"
 
 namespace Epsilon::OpenGL
 {
@@ -19,11 +23,12 @@ namespace Epsilon::OpenGL
         RenderSystem (): Epsilon::RenderSystem(SpecificationType::OpenGL)
         {
         };
-        void Render(glShader* shader, OpenGL::Mesh& mesh);
+        void Render(Epsilon::Material &shader, OpenGL::Mesh& mesh);
         Epsilon::ContextWindow * PushBackNewWindow(unsigned int width, unsigned int height) override;
-        Shader GetShader(const std::string &shaderName) override{ return Shader();}
+        Buffer* UpdateBuffer(unsigned location, const std::vector<char>& data);
     private:
-        std::unordered_map<std::string, glShader> shaders_;
+        static inline SpecificationData<OpenGL::RenderPipeline, OpenGL::Mesh> openGLData_;
+        static inline std::stack<Buffer> bufferPool_;
     };
 }
 

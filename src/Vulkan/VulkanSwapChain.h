@@ -22,7 +22,7 @@ namespace Epsilon::Vulkan
     class SwapChain
     {
     public:
-        SwapChain(Device &device, Surface &screen, GLFWwindow *window);
+        SwapChain(Device &device, Surface &screen, GLFWwindow *window, CommandPool& pool);
         ~SwapChain();
         [[nodiscard]] VkSwapchainKHR GetSwapchainHandle() const { return handle_; }
         [[nodiscard]] VkExtent2D GetExtent() const {return extent_;}
@@ -33,7 +33,6 @@ namespace Epsilon::Vulkan
 
         [[nodiscard]] VkRenderPass GetRenderPass() const { return renderPass_->GetHandle();}
         [[nodiscard]] VkDevice GetDevice() const { return Device_.GetLogicalHandle();}
-        [[nodiscard]] CommandPool & GetCommnandPool() { return *commandPool_; }
         [[nodiscard]] DescriptorPool& GetDescriptorPool() const { return *DescriptorPool_;}
         [[nodiscard]] uint32_t GetMinImageCount() const { return minImageCount_;}
         [[nodiscard]] uint32_t GetImageCount() const { return imageCount;}
@@ -44,6 +43,7 @@ namespace Epsilon::Vulkan
 
         Device& Device_;
         Surface& surface_;
+        CommandPool& pool_;
         GLFWwindow *windowHandle_;
         VkFormat format_;
         VkSwapchainKHR handle_;
@@ -52,7 +52,6 @@ namespace Epsilon::Vulkan
         VkExtent2D extent_;
         RenderPass* renderPass_;
         std::vector<VkFramebuffer> frameBuffers_;
-        CommandPool* commandPool_;
         std::vector<CommandBuffer> commandBuffers_;
         std::vector<VkSemaphore> imageAvailableSemaphore_, renderFinishedSemaphore_;
         std::vector<VkFence> fences_;

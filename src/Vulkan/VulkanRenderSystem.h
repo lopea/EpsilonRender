@@ -22,14 +22,18 @@ namespace Epsilon::Vulkan
         ~RenderSystem() override;
         ContextWindow * PushBackNewWindow(unsigned int width, unsigned int height) override;
 
-        [[nodiscard]] Instance& GetVulkanInstance()  {return instance_;}
+        [[nodiscard]] Instance& GetVulkanInstance()  {return *instance_;}
+        Device& GetVulkanDevice() {return *device_;}
+        CommandPool& GetCommandPool() {return *pool_;}
 
-
-        Shader GetShader(const std::string &shaderName) override;
 
     private:
         //! Stores the connection of the Vulkan API with our program
-        Instance instance_;
+        Instance* instance_;
+
+        Device* device_;
+
+        CommandPool* pool_;
 
     };
 }
