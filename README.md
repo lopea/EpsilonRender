@@ -1,5 +1,5 @@
 # Epsilon Renderer
-## A tiny little vulkan/OpenGL renderer. The precursor to [EpsilonPlus](https://github.com/lopea/EpsilonEditor)
+## A tiny little vulkan/OpenGL renderer. The precursor to [Epsilon](https://github.com/lopea/EpsilonEditor)
 ### Setup
 #### Prerequisites
 - Windows or Linux (Mac untested)
